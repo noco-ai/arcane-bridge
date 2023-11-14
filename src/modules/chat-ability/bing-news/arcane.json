@@ -1,0 +1,17 @@
+{
+  "name": "chat-ability/bing-news",
+  "description": "Provides chat ability to get news from Bing",
+  "dependencies": ["spellbook/core"],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "news-search.skill",
+          "function": "processArticleSummary",
+          "filter": "job:summarize_news_article"
+        }
+      ]
+    }
+  ]
+}

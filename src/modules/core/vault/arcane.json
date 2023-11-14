@@ -1,0 +1,32 @@
+{
+  "name": "service/vault",
+  "description": "Provides the vault service for storing configuration data.",
+  "service": [
+    {
+      "class_name": "VaultService",
+      "class_file": "vault.service",
+      "description": "Provides the vault service for the application."
+    }
+  ],
+  "cli_option": [
+    {
+      "option": "-vh, --vault-host <string>",
+      "description": "Host of the Vault server",
+      "required": true,
+      "opts_key": "vaultHost",
+      "default": "http://localhost:8200/v1"
+    },
+    {
+      "option": "-vt, --vault-token <string>",
+      "description": "File that holds the API token for communicating w/ Vault",
+      "default": "./vault-token",
+      "opts_key": "vaultToken"
+    },
+    {
+      "option": "-vr, --vault-root <string>",
+      "description": "Root key store to use on the Vault server",
+      "opts_key": "vaultRoot",
+      "default": "spellbook"
+    }
+  ]
+}

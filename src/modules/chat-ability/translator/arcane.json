@@ -1,0 +1,17 @@
+{
+  "name": "chat-ability/translator",
+  "description": "Provides tools for translating text from one language to another.",
+  "dependencies": ["spellbook/core"],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "translator.skill",
+          "function": "translationDone",
+          "filter": "job:translate_text"
+        }
+      ]
+    }
+  ]
+}

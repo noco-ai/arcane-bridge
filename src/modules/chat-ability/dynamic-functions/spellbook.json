@@ -1,0 +1,42 @@
+{
+  "label": "Dynamic Functions",
+  "version": "1.0.0",
+  "spell_label": "Wizards Wand",
+  "module": "chat-ability/dynamic-functions",
+  "dependencies": ["spellbook/core"],
+  "description": "Creates function for handling simple tasks based off a function description.",
+  "icon": "asset/chat-ability/dynamic-functions/dynamic.jpeg",
+  "skill_dependencies": ["openai_gpt_4"],
+  "unique_key": "wizards_wand",
+  "shortcut": "🧪",
+  "chat_ability": [
+    {
+      "label": "Dynamic Functions",
+      "spell_label": "Wizards Wand",
+      "class_file": "dynamic.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/dynamic-functions/dynamic.jpeg",
+      "function_definition": [
+        "This function explains the meaning of supercalifragilisticexpialidocious."
+      ],
+      "parameters": [
+        {
+          "name": "input_text",
+          "description": ["The input string to the function."],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Dynamic Functions",
+      "spell_label": "Wizards Wand",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 5000,
+      "icon": "pi pi-fw pi-bolt",
+      "route": "settings/chat-ability/dynamic-functions"
+    }
+  ]
+}

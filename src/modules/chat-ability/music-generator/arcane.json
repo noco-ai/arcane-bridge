@@ -1,0 +1,17 @@
+{
+  "name": "chat-ability/music-generator",
+  "description": "Chat ability to provide access to music generation.",
+  "dependencies": ["core/amqp", "spellbook/core"],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "music-generator.skill",
+          "function": "handleWav",
+          "filter": "command:generate_music_wav"
+        }
+      ]
+    }
+  ]
+}

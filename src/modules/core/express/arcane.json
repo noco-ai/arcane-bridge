@@ -1,0 +1,13 @@
+{
+  "name": "core/express",
+  "description": "Provides the core HTTP(s) server to the application",
+  "dependencies": ["core/logger", "core/class-factory"],
+  "service": [
+    {
+      "class_name": "ExpressService",
+      "class_file": "express.service",
+      "description": "Provides the HTTP(s) server service to the application.",
+      "log_config": ["core/logger/general"]
+    }
+  ]
+}

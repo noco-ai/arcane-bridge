@@ -1,0 +1,22 @@
+{
+  "name": "core/sequelize",
+  "description": "Provides the core HTTP(s) server to the application",
+  "dependencies": ["core/logger", "core/vault"],
+  "service": [
+    {
+      "class_name": "SequelizeService",
+      "class_file": "sequelize.service",
+      "description": "Provides access to SQL models.",
+      "log_config": ["core/logger/general"]
+    }
+  ],
+  "cli_option": [
+    {
+      "option": "-cs, --create-schema",
+      "description": "If set to true the application will sync all sequelize schema on startup",
+      "required": true,
+      "opts_key": "createSchema",
+      "default": false
+    }
+  ]
+}

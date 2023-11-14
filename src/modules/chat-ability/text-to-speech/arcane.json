@@ -1,0 +1,22 @@
+{
+  "name": "chat-ability/text-to-speech",
+  "description": "Chat ability to provide text to speech.",
+  "dependencies": [
+    "core/amqp",
+    "core/express",
+    "spellbook/core",
+    "chat-ability/music-generator"
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "text-to-speech.skill",
+          "function": "handleWav",
+          "filter": "command:generate_text_to_speech_wav"
+        }
+      ]
+    }
+  ]
+}

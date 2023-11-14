@@ -1,0 +1,33 @@
+{
+    "processor": "config.processor",
+    "properties": {        
+        "express_route": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "route": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9*_:/-]+$"
+                    },
+                    "request_type": {
+                        "type": "string",
+                        "default": "get",
+                        "pattern": "get|post"
+                    },
+                    "route_file": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9-_./]+$"
+                    },
+                    "route_function": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_]+$",
+                        "default": "resolve"
+                    }                            
+                },
+                "required": ["route", "route_file", "route_function"],
+                "additionalProperties": false
+            }
+        }        
+    }
+}

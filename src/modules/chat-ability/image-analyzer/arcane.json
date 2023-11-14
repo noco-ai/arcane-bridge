@@ -1,0 +1,22 @@
+{
+  "name": "chat-ability/image-analyzer",
+  "description": "Chat ability to provide access to image generation.",
+  "dependencies": ["core/amqp", "core/express", "spellbook/core"],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "image-analyzer.skill",
+          "function": "handleImageClassification",
+          "filter": "command:classify_image"
+        },
+        {
+          "class_name": "image-analyzer.skill",
+          "function": "handleObjectDetection",
+          "filter": "command:object_detection"
+        }
+      ]
+    }
+  ]
+}

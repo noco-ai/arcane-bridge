@@ -1,0 +1,148 @@
+{
+  "name": "spellbook/core",
+  "description": "Base resources for connecting to Spellbook frontend to Element Golem backend",
+  "dependencies": ["core/amqp", "core/socket", "core/sequelize"],
+  "config_file": [
+    {
+      "name": "spellbook",
+      "processor": "SpellbookConfigProcessor"
+    }
+  ],
+  "service": [
+    {
+      "class_name": "WorkspaceService",
+      "class_file": "workspace.service",
+      "description": "Provides utility functions for saving and reading workspace files and directories.",
+      "log_config": ["core/logger/general"]
+    },
+    {
+      "class_name": "SpellbookService",
+      "class_file": "spellbook.service",
+      "description": "Provides the core communication between the UI and worker servers.",
+      "log_config": ["core/logger/general"]
+    }
+  ],
+  "sequelize_model": [
+    {
+      "name": "SpellbookModule",
+      "class_file": "model/spellbook.module.model",
+      "factory_file": "model/spellbook.module.model.factory"
+    }
+  ],
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "spellbook.service",
+          "function": "handleGetMenu",
+          "filter": "command:get_menu"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleSpellList",
+          "filter": "command:get_spell_list"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleCustomSkill",
+          "filter": "command:custom_skill"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleConfigureSkill",
+          "filter": "command:configure_skill"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleWorkerReport",
+          "filter": "command:worker_report"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleRunSkill",
+          "filter": "command:run_skill"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleStopSkill",
+          "filter": "command:stop_skill"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleInstallSkill",
+          "filter": "command:install_skill"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleGetConfiguration",
+          "filter": "command:get_configuration"
+        },
+        {
+          "class_name": "spellbook.service",
+          "function": "handleUpdateModule",
+          "filter": "command:update_module"
+        }
+      ]
+    }
+  ],
+  "exchange": [
+    {
+      "name": "arcane_bridge",
+      "type": "direct",
+      "auto_delete": false
+    },
+    {
+      "name": "arcane_bridge_broadcast",
+      "type": "fanout",
+      "auto_delete": false
+    },
+    {
+      "name": "golem_broadcast",
+      "type": "fanout",
+      "auto_delete": false
+    }
+  ],
+  "express_route": [
+    {
+      "route": "/asset/:companyname/:modulename/:assetname",
+      "route_file": "route/spellbook.asset",
+      "route_function": "serveFile"
+    },
+    {
+      "route": "/workspace/*",
+      "route_file": "route/workspace.serve",
+      "route_function": "serveFile"
+    },
+    {
+      "route": "/upload/workspace",
+      "route_file": "route/workspace.serve",
+      "route_function": "uploadFile",
+      "request_type": "post"
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "dead_letter_exchange": "deadletter",
+      "dead_letter_routing_key": "deadletters",
+      "auto_delete": false,
+      "binding": [
+        {
+          "exchange": "arcane_bridge",
+          "routing_key": "arcane_bridge_{serverid}"
+        },
+        {
+          "exchange": "arcane_bridge_broadcast",
+          "routing_key": "arcane_bridge"
+        }
+      ],
+      "consumer": [
+        {
+          "class_name": "spellbook.service",
+          "function": "processMessageQueue"
+        }
+      ]
+    }
+  ]
+}

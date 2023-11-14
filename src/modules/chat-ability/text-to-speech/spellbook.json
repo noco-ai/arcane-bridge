@@ -1,0 +1,103 @@
+{
+  "label": "Text To Speech",
+  "version": "1.0.0",
+  "spell_label": "Narrator’s Nimbus",
+  "module": "chat-ability/text-to-speech",
+  "dependencies": ["spellbook/core"],
+  "description": "Generates a speech file from text.",
+  "icon": "asset/chat-ability/text-to-speech/tts-icon.jpeg",
+  "skill_dependencies": ["text_to_speech"],
+  "unique_key": "text_to_speech",
+  "shortcut": "💬",
+  "chat_ability": [
+    {
+      "label": "Text To Speech",
+      "spell_label": "Narrator’s Nimbus",
+      "class_file": "text-to-speech.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/text-to-speech/tts-icon.jpeg",
+      "function_definition": [
+        "This function generates a wav speech file from input text."
+      ],
+      "parameters": [
+        {
+          "name": "prompt",
+          "description": ["The text to use to generate the speech file."],
+          "required": true
+        },
+        {
+          "name": "voice",
+          "description": [
+            "The voice number to use when generating the text to speech.",
+            "The voice ID used in the text to speech."
+          ],
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Text To Speech",
+      "spell_label": "Narrator’s Nimbus",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 5000,
+      "icon": "pi pi-fw pi-comment",
+      "route": "settings/chat-ability/text-to-speech"
+    }
+  ],
+  "configuration": {
+    "vault_path": "chat_ability/text_to_speech",
+    "options": [
+      {
+        "label": "Voice",
+        "name": "voice",
+        "editable": true,
+        "type": "dropdown",
+        "select_options": [
+          {
+            "value": "speaker_0",
+            "label": "Voice #1"
+          },
+          {
+            "value": "speaker_1",
+            "label": "Voice #2"
+          },
+          {
+            "value": "speaker_2",
+            "label": "Voice #3"
+          },
+          {
+            "value": "speaker_3",
+            "label": "Voice #4"
+          },
+          {
+            "value": "speaker_4",
+            "label": "Voice #5"
+          },
+          {
+            "value": "speaker_5",
+            "label": "Voice #6"
+          },
+          {
+            "value": "speaker_6",
+            "label": "Voice #7"
+          },
+          {
+            "value": "speaker_7",
+            "label": "Voice #8"
+          },
+          {
+            "value": "speaker_8",
+            "label": "Voice #9"
+          },
+          {
+            "value": "speaker_9",
+            "label": "Voice #10"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "label": "AI Assistant",
+  "version": "1.0.0",
+  "spell_label": "Arcane Mystic",
+  "module": "spellbook/core",
+  "visible": false,
+  "description": "Not a spell but core definitions for spellbook UI",
+  "unique_key": "spellbook_core",
+  "can_remove": false,
+  "menu_group": [
+    {
+      "label": "Applications",
+      "spell_label": "Spells",
+      "key": "spells",
+      "sort_order": 100
+    },
+    {
+      "label": "Settings",
+      "spell_label": "Arcane Bindings",
+      "key": "configuration",
+      "sort_order": 200
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "App Manager",
+      "spell_label": "Registry of Runes",
+      "group": "spells",
+      "sort_order": 200,
+      "icon": "pi pi-fw pi-th-large",
+      "route": "app-manager"
+    },
+    {
+      "label": "Theme Options",
+      "spell_label": "Stylistic Scepter",
+      "group": "configuration",
+      "sort_order": 100,
+      "icon": "pi pi-fw pi-palette",
+      "route": "configuration/theme"
+    },
+    {
+      "label": "Skills Configuration",
+      "spell_label": "Golem Horde",
+      "group": "configuration",
+      "sort_order": 50,
+      "icon": "pi pi-fw pi-sitemap",
+      "route": "servers"
+    },
+    {
+      "label": "Applications",
+      "spell_label": "Codex of Spells",
+      "group": "configuration",
+      "sort_order": 50,
+      "icon": "pi pi-fw pi-share-alt",
+      "route": "spell-index",
+      "key": "server_config",
+      "enabled": false
+    },
+    {
+      "spell_label": "Incantations",
+      "label": "Chat Abilities",
+      "group": "configuration",
+      "key": "ability_settings",
+      "sort_order": 200,
+      "icon": "pi pi-fw pi-comments",
+      "route": "spell-index"
+    },
+    {
+      "spell_label": "Codex of Spells",
+      "label": "Applications",
+      "group": "configuration",
+      "key": "application_settings",
+      "sort_order": 201,
+      "icon": "pi pi-fw pi-code",
+      "route": "spell-index"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+function executeFunction(params) {
+    const { number_1, number_2 } = params;
+    const result = number_1 + number_2;
+    return `The sum of ${number_1} and ${number_2} is ${result}.`;
+}

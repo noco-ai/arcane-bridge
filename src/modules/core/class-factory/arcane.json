@@ -1,0 +1,13 @@
+{
+  "name": "core/class-factory",
+  "description": "Service for creating and managing instances of classes.",
+  "dependencies": ["core/logger"],
+  "service": [
+    {
+      "class_name": "ClassFactoryService",
+      "class_file": "class.factory.service",
+      "log_config": ["core/logger/class-factory", "core/logger/general"],
+      "description": "Service for creating and managing instances of classes."
+    }
+  ]
+}

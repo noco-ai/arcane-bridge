@@ -1,0 +1,21 @@
+{
+  "name": "core/amqp",
+  "description": "Provides the core service for communicating w/ amqp",
+  "dependencies": ["core/vault", "core/class-factory"],
+  "service": [
+    {
+      "class_name": "AmqpService",
+      "class_file": "amqp.service",
+      "description": "Provides the amqp service for the application.",
+      "log_config": ["core/logger/amqp", "core/logger/general"]
+    }
+  ],
+  "cli_option": [
+    {
+      "option": "-id, --server-id <string>",
+      "description": "Unique server ID for routing if multiple instance of AB are needed.",
+      "opts_key": "serverId",
+      "default": "aa373sb"
+    }
+  ]
+}

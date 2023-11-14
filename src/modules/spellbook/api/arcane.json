@@ -1,0 +1,30 @@
+{
+  "name": "spellbook/api",
+  "description": "API access to skills",
+  "dependencies": ["core/amqp", "core/express", "spellbook/core"],
+  "express_route": [
+    {
+      "route": "/api/v1/skill/execute/:routing_key",
+      "route_file": "route/access.skill",
+      "route_function": "executeSkill",
+      "request_type": "post"
+    },
+    {
+      "route": "/api/v1/skill/online",
+      "route_file": "route/access.skill",
+      "route_function": "apiOnlineSkills"
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "route/access.skill",
+          "function": "handleSkillResponse",
+          "filter": "command:api_request"
+        }
+      ]
+    }
+  ]
+}

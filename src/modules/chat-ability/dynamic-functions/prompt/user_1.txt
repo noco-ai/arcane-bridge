@@ -1,0 +1,15 @@
+{
+      "function_definition": "This function add two number together",
+      "parameters": [
+        {
+          "name": "number_1",
+          "description": "The first number to add.",
+          "required": true
+        },
+        {
+          "name": "number_2",
+          "description":  "The second number to add.",
+          "required": true
+        }      
+    ]
+}

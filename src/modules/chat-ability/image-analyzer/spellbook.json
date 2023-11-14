@@ -1,0 +1,71 @@
+{
+  "label": "Image Analyzer",
+  "version": "1.0.0",
+  "spell_label": "Oculus of Insight",
+  "module": "chat-ability/image-analyzer",
+  "dependencies": ["spellbook/core"],
+  "description": "Analyzes an image.",
+  "icon": "asset/chat-ability/image-analyzer/analyzer-icon.jpeg",
+  "unique_key": "image_analyzer",
+  "skill_dependencies": ["object_detection", "image_classification"],
+  "shortcut": "👁‍🗨",
+  "chat_ability": [
+    {
+      "label": "Image CLassification",
+      "spell_label": "Oculus of Insight",
+      "class_file": "image-analyzer.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/image-analyzer/analyzer-icon.jpeg",
+      "function_definition": [
+        "This function classifies an image into its respective category.",
+        "This function identifies the category or type of an image."
+      ],
+      "parameters": [
+        {
+          "name": "image_filename",
+          "description": ["The filename of the image to be classified."]
+        }
+      ]
+    },
+    {
+      "label": "Object Detection",
+      "spell_label": "Oculus of Insight",
+      "class_file": "image-analyzer.skill",
+      "execute_function": "executeDetectObjects",
+      "icon": "asset/chat-ability/image-analyzer/analyzer-icon.jpeg",
+      "function_definition": [
+        "This function detects objects in a image.",
+        "This function runs an instance of YOLOv3 for object detection"
+      ],
+      "parameters": [
+        {
+          "name": "image_filename",
+          "description": ["The filename of the image to detect objects in."]
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Image Analyzer",
+      "spell_label": "Oculus of Insight",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 5000,
+      "icon": "pi pi-fw pi-images",
+      "route": "settings/chat-ability/image-analyzer"
+    }
+  ],
+  "configuration": {
+    "vault_path": "chat_ability/image_generation",
+    "options": [
+      {
+        "label": "Negative Prompt",
+        "name": "negative_prompt",
+        "editable": true,
+        "type": "textarea",
+        "default": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "label": "AI Assistant",
+  "version": "1.0.0",
+  "spell_label": "Arcane Mystic",
+  "module": "spellbook/prompt",
+  "description": "Provides the main application for interacting with LLMs.",
+  "dependencies": ["spellbook/core"],
+  "unique_key": "spellbook_prompt",
+  "can_remove": false,
+  "skill_dependencies": ["language_model|visual_language_model"],
+  "configuration": {
+    "vault_path": "spells/ai-assistant",
+    "options": [
+      {
+        "label": "🥇 Preferred Model",
+        "name": "preferred_model",
+        "editable": true,
+        "type": "dropdown",
+        "modifier_class": "spellbook.prompt",
+        "modifier_function": "modifyModelConfigurationOptions"
+      },
+      {
+        "label": "🥈 Secondary Model",
+        "name": "secondary_model",
+        "editable": true,
+        "type": "dropdown",
+        "modifier_class": "spellbook.prompt",
+        "modifier_function": "modifyModelConfigurationOptions"
+      },
+      {
+        "label": "Max New Tokens",
+        "name": "max_new_tokens",
+        "editable": true,
+        "type": "slider",
+        "max": 16384,
+        "default": 1024
+      },
+      {
+        "label": "Function Similarity Threshold",
+        "name": "function_call_threshold",
+        "editable": true,
+        "type": "slider",
+        "max": 1,
+        "default": 0.92,
+        "min": 0.8,
+        "step": 0.01
+      },
+      {
+        "label": "Model Expert Similarity Threshold",
+        "name": "model_route_threshold",
+        "editable": true,
+        "type": "slider",
+        "max": 1,
+        "default": 0.92,
+        "min": 0.8,
+        "step": 0.01
+      }
+    ]
+  },
+  "menu_item": [
+    {
+      "label": "AI Assistant",
+      "spell_label": "Arcane Mystic",
+      "group": "spells",
+      "sort_order": 100,
+      "icon": "pi pi-fw pi-share-alt",
+      "route": "ai-assistant",
+      "key": "ai_assistant",
+      "spell_index": "spellbook/prompt"
+    },
+    {
+      "label": "AI Assistant",
+      "spell_label": "Arcane Mystic",
+      "parent": "application_settings",
+      "group": "configuration",
+      "sort_order": 1000,
+      "icon": "pi pi-fw pi-share-alt",
+      "route": "settings/spellbook/prompt"
+    }
+  ]
+}

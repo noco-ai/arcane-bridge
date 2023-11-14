@@ -1,0 +1,59 @@
+{
+  "label": "Current Weather",
+  "version": "1.0.0",
+  "spell_label": "Scroll of Atmospheara",
+  "module": "chat-ability/accuweather",
+  "dependencies": ["spellbook/core"],
+  "description": "Provides current weather information using the Accuweather API.",
+  "icon": "asset/chat-ability/accuweather/weather-icon.jpeg",
+  "unique_key": "current_weather",
+  "shortcut": "🌞",
+  "configuration": {
+    "vault_path": "chat_ability/accuweather",
+    "options": [
+      {
+        "label": "API Key",
+        "name": "api_key",
+        "editable": true,
+        "type": "secret"
+      },
+      {
+        "label": "Default Location",
+        "name": "default_location",
+        "editable": true,
+        "type": "string"
+      }
+    ]
+  },
+  "chat_ability": [
+    {
+      "label": "Current Weather",
+      "spell_label": "Scroll of Atmospheara",
+      "function_definition": [
+        "This function gets the current weather or forecast including temperature for a location.",
+        "This function retrieves the current temperature."
+      ],
+      "class_file": "weather.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/accuweather/weather-icon.jpeg",
+      "allow_empty_parameters": true,
+      "parameters": [
+        {
+          "name": "location",
+          "description": ["Location the user is trying to get the weather for."]
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Current Weather",
+      "spell_label": "Current Weather",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 1000,
+      "icon": "pi pi-fw pi-sun",
+      "route": "settings/chat-ability/accuweather"
+    }
+  ]
+}

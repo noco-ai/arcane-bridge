@@ -1,0 +1,221 @@
+{
+  "name": "spellbook/prompt",
+  "description": "Provides the core service for communicating a prompt to a LLM",
+  "dependencies": ["spellbook/core"],
+  "socket_event": [
+    {
+      "event": "prompt",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handlePrompt"
+        }
+      ]
+    },
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleGetRunningLanguageModels",
+          "filter": "command:get_online_language_models"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleClearEmbeddings",
+          "filter": "command:update_module"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleResetWorkspace",
+          "filter": "command:reset_workspace"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleStopGeneration",
+          "filter": "command:stop_generation"
+        }
+      ]
+    },
+    {
+      "event": "connection",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleSocketConnection"
+        }
+      ]
+    },
+    {
+      "event": "disconnect",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleSocketDisconnect"
+        }
+      ]
+    }
+  ],
+  "sequelize_model": [
+    {
+      "name": "DynamicFunction",
+      "class_file": "model/dynamic.function.model",
+      "factory_file": "model/dynamic.function.model.factory"
+    },
+    {
+      "name": "PinnedEmbedding",
+      "class_file": "model/pinned.embedding.model",
+      "factory_file": "model/pinned.embedding.model.factory"
+    },
+    {
+      "name": "ChatConversation",
+      "class_file": "model/chat.conversation.model",
+      "factory_file": "model/chat.conversation.model.factory",
+      "graphql_query": [
+        {
+          "query": "getConversation",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "ChatConversationQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteConversation",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "ChatConversationDelete",
+          "resolver_file": "spellbook.prompt",
+          "resolver_function": "deleteConversation"
+        },
+        {
+          "mutation": "updateConversation",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "topic",
+              "type": "string"
+            },
+            {
+              "name": "use_model",
+              "type": "string"
+            },
+            {
+              "name": "system_message",
+              "type": "string"
+            },
+            {
+              "name": "router_config",
+              "type": "string"
+            },
+            {
+              "name": "top_p",
+              "type": "float"
+            },
+            {
+              "name": "top_k",
+              "type": "float"
+            },
+            {
+              "name": "seed",
+              "type": "integer"
+            },
+            {
+              "name": "temperature",
+              "type": "float"
+            }
+          ],
+          "schema_type": "ChatConversationUpdate",
+          "resolver_file": "spellbook.prompt",
+          "resolver_function": "updateConversation"
+        }
+      ]
+    },
+    {
+      "name": "ChatConversationMessage",
+      "class_file": "model/chat.message.model",
+      "factory_file": "model/chat.message.model.factory",
+      "graphql_query": [
+        {
+          "query": "getConversationMessages",
+          "args": [
+            {
+              "name": "conversation_id",
+              "type": "integer"
+            }
+          ],
+          "response_type": "list",
+          "schema_type": "ChatConversationMessageQuery"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteConversationMessage",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "ChatConversationDeleteMessage",
+          "resolver_file": "spellbook.prompt",
+          "resolver_function": "deleteConversationMessage"
+        }
+      ]
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handlePromptResponse",
+          "filter": "command:prompt_response"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handlePromptFragment",
+          "filter": "command:prompt_fragment"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleChatProgress",
+          "filter": "command:update_chat_progress"
+        }
+      ]
+    },
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "spellbook.prompt",
+          "function": "processInferActionJob",
+          "filter": "job:infer_prompt_action"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleClearEmbeddings",
+          "filter": "command:skill_started"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleClearEmbeddings",
+          "filter": "command:skill_stopped"
+        }
+      ]
+    }
+  ]
+}

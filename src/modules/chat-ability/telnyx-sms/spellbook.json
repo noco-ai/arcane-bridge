@@ -1,0 +1,75 @@
+{
+  "label": "Telenyx SMS",
+  "version": "1.0.0",
+  "spell_label": "Rune Relay Rite",
+  "module": "chat-ability/telnyx-sms",
+  "dependencies": ["spellbook/core"],
+  "description": "Sends SMS and MMS to the phone number specified.",
+  "icon": "asset/chat-ability/telnyx-sms/sms-icon.jpeg",
+  "unique_key": "telynx_sms",
+  "shortcut": "📱",
+  "skill_dependencies": [],
+  "configuration": {
+    "vault_path": "chat_ability/telynx_sms",
+    "options": [
+      {
+        "label": "Telnyx API Key",
+        "name": "api_key",
+        "editable": true,
+        "type": "secret"
+      },
+      {
+        "label": "From Phone #",
+        "name": "from_number",
+        "editable": true,
+        "type": "string"
+      }
+    ]
+  },
+  "chat_ability": [
+    {
+      "label": "Telenyx SMS",
+      "spell_label": "Rune Relay Rite",
+      "class_file": "telnyx-sms.skill",
+      "execute_function": "execute",
+      "icon": "asset/chat-ability/telnyx-sms/sms-icon.jpeg",
+      "function_definition": [
+        "This function sends a SMS message to a specified phone number.",
+        "This function sends a SMS message and image to a specified phone number."
+      ],
+      "parameters": [
+        {
+          "name": "phone_number",
+          "description": ["The phone number to send the message to."],
+          "required": true
+        },
+        {
+          "name": "message",
+          "description": [
+            "The message to send.",
+            "The content of the message."
+          ],
+          "required": true
+        },
+        {
+          "name": "filename",
+          "description": [
+            "The filename of the file to send with the MMS.",
+            "The filename of the image to be sent."
+          ]
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Telenyx SMS",
+      "spell_label": "Rune Relay Rite",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 1000,
+      "icon": "pi pi-fw pi-mobile",
+      "route": "settings/chat-ability/telnyx-sms"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "label": "Music Generator",
+  "version": "1.0.0",
+  "spell_label": "Potion of Pitches",
+  "module": "chat-ability/music-generator",
+  "dependencies": ["spellbook/core"],
+  "description": "🎶 This chat ability uses music generators provided by Elemental Golem to allow for music generation from a text prompt.",
+  "icon": "asset/chat-ability/music-generator/music-icon.jpeg",
+  "unique_key": "music_generator",
+  "skill_dependencies": ["music_generation"],
+  "shortcut": "🎶",
+  "chat_ability": [
+    {
+      "label": "Music Generator",
+      "spell_label": "Potion of Pitches",
+      "class_file": "music-generator.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/music-generator/music-icon.jpeg",
+      "function_definition": [
+        "This function generates a song from a text description.",
+        "This function generates a new melody using the given instrument and parameters."
+      ],
+      "parameters": [
+        {
+          "name": "prompt",
+          "description": ["The text prompt to use for generating the song."],
+          "required": true
+        },
+        {
+          "name": "length_in_seconds",
+          "description": ["The length of the song to generate in seconds."],
+          "type": "number"
+        },
+        {
+          "name": "guidance_scale",
+          "description": [
+            "The guidance scale to use when generating the song."
+          ],
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Music Generator",
+      "spell_label": "Potion of Pitches",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 5000,
+      "icon": "pi pi-fw pi-microphone",
+      "route": "settings/chat-ability/music-generator"
+    }
+  ],
+  "configuration": {
+    "vault_path": "chat_ability/music_generation",
+    "options": [
+      {
+        "label": "Length in Seconds",
+        "name": "length_in_seconds",
+        "editable": true,
+        "type": "slider",
+        "default": 10,
+        "min": 1,
+        "max": 30
+      },
+      {
+        "label": "Guidance Scale",
+        "name": "guidance_scale",
+        "editable": true,
+        "type": "slider",
+        "default": 3,
+        "min": 1,
+        "max": 5
+      }
+    ]
+  }
+}

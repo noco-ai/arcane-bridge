@@ -1,0 +1,27 @@
+{
+    "processor": "config.processor",
+    "properties": {        
+        "sequelize_model": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-{}]+$"
+                    },
+                    "class_file": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_.-/]+$"
+                    },
+                    "factory_file": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_.-/]+$"
+                    }
+                },
+                "required": ["name", "class_file"],
+                "additionalProperties": false
+            }
+        }               
+    }
+}

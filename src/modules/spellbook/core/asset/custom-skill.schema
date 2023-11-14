@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "routing_key": {
+      "type": "string"
+    },
+    "use": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "available_precision": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory_usage": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "provider"]
+      }
+    },
+    "configuration": {
+      "type": "object"
+    },
+    "shortcut": {
+      "type": "string"
+    },
+    "golem_module": {
+      "type": "string"
+    },
+    "moe_domain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["label", "routing_key", "use", "available_precision", "memory_usage", "golem_module"]
+}

@@ -1,0 +1,287 @@
+{
+    "processor": "config.processor",
+    "type": "object",
+    "properties": {        
+        "configuration": {
+            "type": "object",
+            "properties": {
+                "vault_path": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {  
+                        "type": "object",
+                        "properties": {
+                            "label": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string",
+                                "pattern": "textarea|string|multistring|secret|multiselect|checkbox|dropdown|slider"
+                            },
+                            "editable": {
+                                "type": "boolean",
+                                "default": true
+                            },
+                            "default": {
+                                "anyOf": [
+                                    { "type": "string" },
+                                    { "type": "number" },
+                                    { "type": "array", "items": { "type": "string" } }
+                                ]
+                            },
+                            "modifier_class": {
+                                "type": "string"
+                            },
+                            "modifier_function": {
+                                "type": "string"
+                            },
+                            "min": {                                
+                                "type": "number",
+                                "default": 0
+                            },
+                            "max": {
+                                "type": "number",
+                                "default": 100
+                            },
+                            "step": {
+                                "type": "number",
+                                "default": 1
+                            },
+                            "select_options": {
+                                "type": "array",
+                                "items": {  
+                                    "type": "object",
+                                    "properties": {
+                                        "label": {
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["value", "label"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": ["name", "label"],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": ["vault_path", "options"],
+            "additionalProperties": false
+        },
+        "label": {
+            "type": "string"
+        },
+        "visible": {
+            "type": "boolean",
+            "default": true
+        },
+        "enabled": {
+            "type": "boolean",
+            "default": true
+        },
+        "can_remove": {
+            "type": "boolean",
+            "default": true
+        },
+        "is_installed": {
+            "type": "boolean",
+            "default": false
+        },
+        "version": {
+            "type": "string"
+        },
+        "shortcut": {
+            "type": "string"
+        },              
+        "unique_key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+        },
+        "skill_dependencies": {
+            "type": "array",
+            "items": {
+                "type":"string",
+                "pattern": "^[a-z0-9_|]+$"
+            }
+        },
+        "spell_label": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "icon": {
+            "type": "string",
+            "default": "asset/spellbook/core/ai-icon.jpeg"
+        },
+        "module": {
+            "type": "string"
+        },                
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "type":"string",
+                "pattern": "^[a-z0-9-]+/[a-z0-9-]+$"
+            }
+        },
+        "chat_ability": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "spell_label": {
+                        "type": "string"
+                    },                                              
+                    "function_definition": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }                        
+                    },
+                    "skill_dependencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^[a-z0-9_|]+$"
+                        }
+                    },
+                    "allow_empty_parameters": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "parameters": {
+                        "type": "array",
+                        "items": {  
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "type": "boolean",
+                                    "default": false
+                                },
+                                "description": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }                        
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "default": "string",
+                                    "pattern": "string|number|boolean"
+                                }
+                            },
+                            "required": ["name", "description"]
+                        }
+                    },
+                    "wait_message":  {
+                        "type": "string",
+                        "default": ""
+                    },                    
+                    "icon":  {
+                        "type": "string",
+                        "default": "asset/spellbook/core/ai-avatar.png"
+                    },
+                    "class_file": {
+                        "type": "string",
+                        "pattern": "^[a-z-/.]+$"
+                    },
+                    "extractor_function": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    },
+                    "execute_function": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    },
+                    "sort_order": {
+                        "type": "number",
+                        "default": 10000
+                    }
+                },
+                "required": ["label", "spell_label", "class_file", "function_definition", "execute_function"],
+                "additionalProperties": false
+            }
+        },
+        "menu_group":  {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "spell_label": {
+                        "type": "string"
+                    },                    
+                    "key": {
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "type": "number"
+                    }
+                },
+                "required": ["label", "spell_label", "key", "sort_order"],
+                "additionalProperties": false
+            }
+        },
+        "menu_item":  {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "spell_label": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "group": {
+                        "type": "string"
+                    },
+                    "route": {
+                        "type": "string"
+                    },
+                    "spell_index": {
+                        "type": "string"
+                    },
+                    "sort_order": {
+                        "type": "number",
+                        "default": 0
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "parent": {
+                        "type": "string"
+                    }
+                },
+                "required": ["label", "spell_label", "icon", "group", "route"],
+                "additionalProperties": false
+            }  
+        }
+    },
+    "required": ["label", "spell_label", "description", "module", "unique_key", "version"],
+    "additionalProperties": false
+}

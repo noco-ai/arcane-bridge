@@ -1,0 +1,18 @@
+{
+    "name": "chat-ability/dynamic-functions",
+    "description": "Module to convert function definitions to executable code.",
+    "dependencies": ["spellbook/core", "spellbook/prompt"],
+    "queue": [
+      {
+        "name": "arcane_bridge_{serverid}",
+        "consumer": [
+          {
+            "class_name": "dynamic.skill",
+            "function": "codingDone",
+            "filter": "job:code_dynamic_function"
+          }
+        ]
+      }
+    ]
+  }
+  

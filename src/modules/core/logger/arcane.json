@@ -1,0 +1,12 @@
+{
+  "name": "core/logger",
+  "description": "Provides the core service for logging to the console",
+  "dependencies": ["core/vault"],
+  "service": [
+    {
+      "class_name": "LoggerService",
+      "class_file": "logger.service",
+      "description": "Provides logging services for the application."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+    "processor": "config.processor",
+    "properties": {        
+        "socket_event": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "event": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                    },                    
+                    "consumer": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "class_name": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_.-]+$"
+                                },
+                                "function": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$"
+                                },
+                                "filter": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+$"
+                                }
+                            },
+                            "required": ["class_name", "function"],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": ["event"],
+                "additionalProperties": false
+            }
+        }
+    }        
+}

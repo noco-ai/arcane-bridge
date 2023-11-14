@@ -1,0 +1,101 @@
+{
+    "processor": "config.processor",
+    "properties": {        
+        "queue": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-{}]+$"
+                    },
+                    "auto_delete": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "durable": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "dead_letter_exchange": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                    },
+                    "dead_letter_routing_key": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                    },
+                    "binding": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "exchange": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_-{}]+$"
+                                },
+                                "routing_key": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_-{}]+$"
+                                }
+                            },
+                            "required": ["exchange", "routing_key"],
+                            "additionalProperties": false
+                        }
+                    },
+                    "consumer": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "class_name": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9/_.-]+$"
+                                },
+                                "function": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$"
+                                },
+                                "filter": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$"
+                                }
+                            },
+                            "required": ["class_name", "function"],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": ["name"],
+                "additionalProperties": false
+            }
+        },
+        "exchange": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-{}]+$"
+                    },
+                    "type": {
+                        "type": "string",
+                        "pattern": "direct|fanout|headers|topic"
+                    },
+                    "auto_delete": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "durable": {
+                        "type": "boolean",
+                        "default": false
+                    }                    
+                },
+                "required": ["name", "type"],
+                "additionalProperties": false
+            }
+        }        
+    }
+}

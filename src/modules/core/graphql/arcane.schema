@@ -1,0 +1,110 @@
+{
+    "processor": "config.processor",
+    "properties": {        
+        "sequelize_model": {
+            "items": {
+                "properties": {
+                    "graphql_query": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z]+$"
+                                },
+                                "schema_type": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z]+$"
+                                },
+                                "args": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {                                            
+                                            "name": {
+                                                "type": "string",
+                                                "pattern": "^[a-zA-Z0-9_]+$"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "pattern": "string|text|integer|bigint|time|float|real|double|decimal|boolean|date|dateonly"
+                                            }
+                                        }
+                                    }
+                                },
+                                "resolver_file": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_.-/]+$"
+                                },
+                                "resolver_function": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$",
+                                    "default": "resolve"
+                                },                            
+                                "response_type": {
+                                    "type": "string",
+                                    "pattern": "list|object",
+                                    "default": "object"
+                                },
+                                "exclude_data": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "^[a-zA-Z0-9_]+$"
+                                    },
+                                    "default": []
+                                }                  
+                            },
+                            "required": ["query", "args", "schema_type"],
+                            "additionalProperties": false
+                        }                        
+                    },
+                    "graphql_mutation": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "mutation": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z]+$"
+                                },
+                                "schema_type": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z]+$"
+                                },
+                                "args": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {                                            
+                                            "name": {
+                                                "type": "string",
+                                                "pattern": "^[a-zA-Z0-9_]+$"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "pattern": "string|text|integer|bigint|time|float|real|double|decimal|boolean|date|dateonly"
+                                            }
+                                        }
+                                    }
+                                },
+                                "resolver_file": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_./-]+$"
+                                },
+                                "resolver_function": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$",
+                                    "default": "resolve"
+                                }                  
+                            },
+                            "required": ["mutation", "args", "schema_type", "resolver_file", "resolver_function"],
+                            "additionalProperties": false
+                        }                        
+                    }
+                }
+            }
+        }               
+    }
+}

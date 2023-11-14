@@ -1,0 +1,70 @@
+{
+  "label": "Bing News",
+  "version": "1.0.0",
+  "spell_label": "Daily Owl",
+  "module": "chat-ability/bing-news",
+  "dependencies": ["spellbook/core"],
+  "description": "Searches current news using Bing API.",
+  "icon": "asset/chat-ability/bing-news/bing-icon.jpeg",
+  "unique_key": "news_search",
+  "shortcut": "📰",
+  "skill_dependencies": ["openai_gpt_35"],
+  "configuration": {
+    "vault_path": "chat_ability/bing_news",
+    "options": [
+      {
+        "label": "API Key",
+        "name": "api_key",
+        "editable": true,
+        "type": "secret"
+      },
+      {
+        "label": "# Articles",
+        "name": "num_articles",
+        "editable": true,
+        "type": "slider",
+        "min": 1,
+        "max": 10,
+        "default": 5
+      }
+    ]
+  },
+  "chat_ability": [
+    {
+      "label": "Bing News",
+      "spell_label": "Daily Owl",
+      "class_file": "news-search.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/bing-news/bing-icon.jpeg",
+      "function_definition": [
+        "This function searches news articles related to a specific topic.",
+        "This function retrieves the latest news articles for a given location."
+      ],
+      "parameters": [
+        {
+          "name": "topic",
+          "description": ["News topic user is searching for."],
+          "required": true
+        },
+        {
+          "name": "num_articles",
+          "description": [
+            "The number of articles to retrieve on the news subject."
+          ],
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Bing News",
+      "spell_label": "Daily Owl",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 1000,
+      "icon": "pi pi-fw pi-book",
+      "route": "settings/chat-ability/bing-news"
+    }
+  ]
+}

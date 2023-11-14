@@ -1,0 +1,65 @@
+{
+  "label": "Language Translator",
+  "version": "1.0.0",
+  "spell_label": "Linguistic Leylines",
+  "module": "chat-ability/translator",
+  "dependencies": ["spellbook/core"],
+  "description": "Translates text from one language to another.",
+  "icon": "asset/chat-ability/translator/translate-icon.jpeg",
+  "skill_dependencies": ["alma_13b_exllama|alma_7b_exllama"],
+  "unique_key": "language_translator",
+  "shortcut": "🈸",
+  "chat_ability": [
+    {
+      "label": "Language Translator",
+      "spell_label": "Linguistic Leylines",
+      "class_file": "translator.skill",
+      "execute_function": "executeSkill",
+      "icon": "asset/chat-ability/translator/translate-icon.jpeg",
+      "function_definition": [
+        "This function translates text from one language to another."
+      ],
+      "parameters": [
+        {
+          "name": "input_text",
+          "description": ["The text to translate in original language."],
+          "required": true
+        },
+        {
+          "name": "input_language",
+          "description": [
+            "The name of language to translate from in english (English, Chinese, etc) ."
+          ],
+          "required": true
+        },
+        {
+          "name": "output_language",
+          "description": [
+            "The name of language to translate to in english (English, Chinese, etc)."
+          ],
+          "required": true
+        },
+        {
+          "name": "translated_text",
+          "description": ["The text translated to the output language."],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "Language Translator",
+      "spell_label": "Linguistic Leylines",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 5000,
+      "icon": "pi pi-fw pi-language",
+      "route": "settings/chat-ability/translator"
+    }
+  ],
+  "configuration": {
+    "vault_path": "chat_ability/translator",
+    "options": []
+  }
+}

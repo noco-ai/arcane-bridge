@@ -1,0 +1,13 @@
+{
+  "name": "core/socket",
+  "description": "Provides the core socket server for slient communication to the application.",
+  "dependencies": ["core/express"],
+  "service": [
+    {
+      "class_name": "SocketService",
+      "class_file": "socket.service",
+      "description": "Provides the core socket server for slient communication to the application.",
+      "log_config": ["core/logger/general"]
+    }
+  ]
+}

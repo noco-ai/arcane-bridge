@@ -1,0 +1,5 @@
+{
+  "name": "core/configuration",
+  "description": "Defines acrane.json schema.",
+  "dependencies": ["core/logger"]
+}

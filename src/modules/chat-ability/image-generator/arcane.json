@@ -1,0 +1,17 @@
+{
+  "name": "chat-ability/image-generator",
+  "description": "Chat ability to provide access to image generation.",
+  "dependencies": ["core/amqp", "core/express", "spellbook/core"],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "image-generator.skill",
+          "function": "handleImage",
+          "filter": "command:generate_image"
+        }
+      ]
+    }
+  ]
+}

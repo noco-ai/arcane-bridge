@@ -1,0 +1,100 @@
+{
+  "label": "FTP Transfer",
+  "version": "1.0.0",
+  "spell_label": "Webway's Warp",
+  "module": "chat-ability/ftp-transfer",
+  "dependencies": ["spellbook/core"],
+  "description": "Transfers files from the workspace to a remote FTP server.",
+  "icon": "asset/chat-ability/ftp-transfer/ftp-icon.jpeg",
+  "unique_key": "ftp_transfer",
+  "shortcut": "💾",
+  "skill_dependencies": [],
+  "configuration": {
+    "vault_path": "chat_ability/ftp_transfer",
+    "options": [
+      {
+        "label": "API Key",
+        "name": "api_key",
+        "editable": true,
+        "type": "secret"
+      },
+      {
+        "label": "# Articles",
+        "name": "num_articles",
+        "editable": true,
+        "type": "slider",
+        "min": 1,
+        "max": 10,
+        "default": 5
+      }
+    ]
+  },
+  "chat_ability": [
+    {
+      "label": "FTP Upload",
+      "spell_label": "Webway's Warp",
+      "class_file": "ftp-transfer.skill",
+      "execute_function": "executeSendFile",
+      "icon": "asset/chat-ability/ftp-transfer/ftp-icon.jpeg",
+      "function_definition": [
+        "This function takes an file as input and transfers it to a specified FTP server."
+      ],
+      "parameters": [
+        {
+          "name": "filename",
+          "description": ["The filename of the file to transfer."],
+          "required": true
+        },
+        {
+          "name": "remote_path",
+          "description": ["The remote path to save the file to."],
+          "required": true
+        },
+        {
+          "name": "dns_name",
+          "description": ["The IP address or DNS name of the server."],
+          "required": true
+        },
+        {
+          "name": "username",
+          "description": ["The username to login to the remote server."],
+          "required": true
+        },
+        {
+          "name": "password",
+          "description": ["The password to access the remote server."],
+          "required": true
+        }
+      ]
+    },
+    {
+      "label": "FTP Download",
+      "spell_label": "Webway's Warp",
+      "class_file": "ftp-transfer.skill",
+      "execute_function": "executeDownloadFile",
+      "icon": "asset/chat-ability/ftp-transfer/ftp-icon.jpeg",
+      "function_definition": [
+        "This function takes downloads a file from a FTP server.",
+        "This function downloads a given image file."
+      ],
+      "parameters": [
+        {
+          "name": "ftp_path",
+          "description": ["The FTP path to download."],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "menu_item": [
+    {
+      "label": "FTP Transfer",
+      "spell_label": "Webway's Warp",
+      "parent": "ability_settings",
+      "group": "configuration",
+      "sort_order": 1000,
+      "icon": "pi pi-fw pi-cloud-download",
+      "route": "settings/chat-ability/ftp-transfer"
+    }
+  ]
+}
