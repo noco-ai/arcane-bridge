@@ -3,6 +3,8 @@
 Arcane Bridge is a TypesScript application that acts as a middleware between the Spellbook UI and the Elemental Golem python servers. It is also where
 chat abilities are implemented allowing for easy access and integration with both npm libs and pip libs w/ Elemental Golem.
 
+![UI demo](https://github.com/noco-ai/spellbook-docker/blob/master/ui-demo.gif)
+
 ## Stack Architecture
 
 ![Software stack diagram](https://github.com/noco-ai/spellbook-docker/blob/master/stack.png)
