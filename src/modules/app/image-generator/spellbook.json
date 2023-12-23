@@ -1,0 +1,24 @@
+{
+  "label": "Image Generator",
+  "version": "1.0.0",
+  "spell_label": "Picturae Genesis",
+  "module": "app/image-generator",
+  "description": "API and UI editor for multi shot use of LLM models.",
+  "dependencies": ["spellbook/core"],
+  "unique_key": "app_image_generator",
+  "icon": "asset/app/image-generator/image-generator.jpeg",
+  "can_remove": true,
+  "skill_dependencies": ["image_generation"],
+  "menu_item": [
+    {
+      "label": "Image Generator",
+      "spell_label": "Picturae Genesis",
+      "group": "spells",
+      "sort_order": 100,
+      "icon": "pi pi-fw pi-image",
+      "route": "image-generator",
+      "key": "app_image_generator",
+      "spell_index": "app/image-generator"
+    }
+  ]
+}

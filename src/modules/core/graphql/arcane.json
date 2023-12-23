@@ -5,7 +5,8 @@
     "core/logger",
     "core/vault",
     "core/express",
-    "core/sequelize"
+    "core/sequelize",
+    "core/socket"
   ],
   "service": [
     {

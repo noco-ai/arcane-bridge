@@ -1,0 +1,154 @@
+{
+  "name": "app/llm-explorer",
+  "description": "App to explore multi-shot applications for models.",
+  "dependencies": [
+    "spellbook/core",
+    "core/express",
+    "core/amqp",
+    "core/socket"
+  ],
+  "express_route": [
+    {
+      "route": "/api/v1/chat/:unique_key",
+      "route_file": "route/chat.route",
+      "route_function": "chatHandler",
+      "request_type": "post"
+    },
+    {
+      "route": "/api/v1/completion/",
+      "route_file": "route/completion.route",
+      "route_function": "completionHandler",
+      "request_type": "post"
+    }
+  ],
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "app.llm-explorer",
+          "function": "handleStopGeneration",
+          "filter": "command:llm_explorer_stop_generation"
+        }
+      ]
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "route/chat.route",
+          "function": "handleChatResponse",
+          "filter": "command:llm_explorer_chat"
+        },
+        {
+          "class_name": "route/chat.route",
+          "function": "handleResponseFragment",
+          "filter": "command:llm_explorer_chat_fragment"
+        },
+        {
+          "class_name": "route/completion.route",
+          "function": "handleCompletionResponse",
+          "filter": "command:llm_explorer_completion"
+        },
+
+        {
+          "class_name": "route/completion.route",
+          "function": "handleResponseFragment",
+          "filter": "command:llm_explorer_completion_fragment"
+        }
+      ]
+    }
+  ],
+  "sequelize_model": [
+    {
+      "name": "LlmExplorerChat",
+      "class_file": "model/chat.model",
+      "factory_file": "model/chat.model.factory",
+      "graphql_query": [
+        {
+          "query": "getLlmExplorerChat",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LlmExplorerChatQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteLlmExplorerChat",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LlmExplorerChatDelete",
+          "resolver_file": "app.llm-explorer",
+          "resolver_function": "deleteChat"
+        },
+        {
+          "mutation": "updateLlmExplorerChat",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "examples",
+              "type": "string"
+            },
+            {
+              "name": "unique_key",
+              "type": "string"
+            },
+            {
+              "name": "system_message",
+              "type": "string"
+            },
+            {
+              "name": "top_p",
+              "type": "float"
+            },
+            {
+              "name": "min_p",
+              "type": "float"
+            },
+            {
+              "name": "top_k",
+              "type": "integer"
+            },
+            {
+              "name": "mirostat",
+              "type": "integer"
+            },
+            {
+              "name": "mirostat_eta",
+              "type": "float"
+            },
+            {
+              "name": "mirostat_tau",
+              "type": "float"
+            },
+            {
+              "name": "seed",
+              "type": "float"
+            },
+            {
+              "name": "temperature",
+              "type": "float"
+            }
+          ],
+          "schema_type": "LlmExplorerChatUpdate",
+          "resolver_file": "app.llm-explorer",
+          "resolver_function": "updateChat"
+        }
+      ]
+    }
+  ]
+}

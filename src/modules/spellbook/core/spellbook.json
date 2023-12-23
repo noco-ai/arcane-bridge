@@ -28,7 +28,17 @@
       "group": "spells",
       "sort_order": 200,
       "icon": "pi pi-fw pi-th-large",
-      "route": "app-manager"
+      "route": "app-manager",
+      "admin_only": true
+    },
+    {
+      "label": "User Accounts",
+      "spell_label": "Registry of Wizards",
+      "group": "configuration",
+      "sort_order": 500,
+      "icon": "pi pi-fw pi-id-card",
+      "route": "users",
+      "admin_only": true
     },
     {
       "label": "Theme Options",
@@ -44,7 +54,8 @@
       "group": "configuration",
       "sort_order": 50,
       "icon": "pi pi-fw pi-sitemap",
-      "route": "servers"
+      "route": "servers",
+      "admin_only": true
     },
     {
       "label": "Applications",

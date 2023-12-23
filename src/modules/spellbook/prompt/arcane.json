@@ -22,6 +22,11 @@
         },
         {
           "class_name": "spellbook.prompt",
+          "function": "handleGetOnlineSkills",
+          "filter": "command:get_online_skills"
+        },
+        {
+          "class_name": "spellbook.prompt",
           "function": "handleClearEmbeddings",
           "filter": "command:update_module"
         },
@@ -126,11 +131,27 @@
             },
             {
               "name": "top_k",
+              "type": "integer"
+            },
+            {
+              "name": "min_p",
+              "type": "float"
+            },
+            {
+              "name": "mirostat",
+              "type": "integer"
+            },
+            {
+              "name": "mirostat_eta",
+              "type": "float"
+            },
+            {
+              "name": "mirostat_tau",
               "type": "float"
             },
             {
               "name": "seed",
-              "type": "integer"
+              "type": "float"
             },
             {
               "name": "temperature",
@@ -192,8 +213,8 @@
         },
         {
           "class_name": "spellbook.prompt",
-          "function": "handleChatProgress",
-          "filter": "command:update_chat_progress"
+          "function": "handleProgressUpdate",
+          "filter": "command:update_progress"
         }
       ]
     },

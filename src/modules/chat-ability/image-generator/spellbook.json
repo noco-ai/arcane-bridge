@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Generates an image from a text description.",
   "icon": "asset/chat-ability/image-generator/image-icon.jpeg",
-  "unique_key": "image_generator",
+  "unique_key": "chat_ability_image_generator",
   "skill_dependencies": ["image_generation"],
   "shortcut": "📷",
   "chat_ability": [
@@ -67,7 +67,7 @@
       "parent": "ability_settings",
       "group": "configuration",
       "sort_order": 5000,
-      "icon": "pi pi-fw pi-camera",
+      "icon": "pi pi-fw pi-image",
       "route": "settings/chat-ability/image-generator"
     }
   ],

@@ -34,6 +34,10 @@ const ChatConversationMessageModelFactory = (
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
       },
+      user_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+      },
       parent_id: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: true,

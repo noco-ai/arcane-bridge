@@ -45,7 +45,7 @@ export class AbilityResponseHelper implements AbilityResponseHelperInterface {
     progressData: ProgressBarUpdate,
     socketId: string
   ): Promise<boolean> {
-    return await this.promptClass.handleChatProgress({
+    return await this.promptClass.handleProgressUpdate({
       content: JSON.stringify(progressData),
       properties: {
         headers: {

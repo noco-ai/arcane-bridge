@@ -14,6 +14,9 @@ const ChatConversationModelFactory = (
         autoIncrement: true,
         primaryKey: true,
       },
+      user_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+      },
       is_private: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -39,6 +42,22 @@ const ChatConversationModelFactory = (
         allowNull: true,
       },
       top_p: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      min_p: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      mirostat: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+      },
+      mirostat_tau: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      mirostat_eta: {
         type: DataTypes.FLOAT,
         allowNull: true,
       },

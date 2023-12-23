@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Transfers files from the workspace to a remote FTP server.",
   "icon": "asset/chat-ability/ftp-transfer/ftp-icon.jpeg",
-  "unique_key": "ftp_transfer",
+  "unique_key": "chat_ability_ftp_transfer",
   "shortcut": "💾",
   "skill_dependencies": [],
   "configuration": {

@@ -357,7 +357,6 @@ export class AmqpService implements AmqpServiceInterface {
           this.channel.reject(message, false);
         }
       } catch (error) {
-        console.log(message);
         this.handleError(`error handling message: ${error}`);
         this.channel.reject(message, false);
       }

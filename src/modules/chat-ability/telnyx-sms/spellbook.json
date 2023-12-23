@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Sends SMS and MMS to the phone number specified.",
   "icon": "asset/chat-ability/telnyx-sms/sms-icon.jpeg",
-  "unique_key": "telynx_sms",
+  "unique_key": "chat_ability_telynx_sms",
   "shortcut": "📱",
   "skill_dependencies": [],
   "configuration": {

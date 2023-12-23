@@ -1,4 +1,5 @@
 export * from "./core/vault";
+export * from "./core/authentication";
 export * from "./core/logger";
 export * from "./core/amqp";
 export * from "./core/core";

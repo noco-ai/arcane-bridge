@@ -6,8 +6,8 @@ import {
   SequelizeServiceInterface,
   ServicesConstructorInterface,
   SpellbookServiceInterface,
+  UserPermissions,
 } from "types";
-import { sync } from "walkdir";
 
 export class MoeHelper {
   private services: ServicesConstructorInterface;
@@ -125,7 +125,7 @@ export class MoeHelper {
           ret.embeddings.push(currentParam.description);
         }
       }
-      ret.dynamic_functions[`dynamic_function_${i}`] = {
+      ret.dynamic_functions[`chat_ability_dynamic_functions_${i}`] = {
         definition: definitionJson,
         code: currentFunction.code,
         index: i,
@@ -229,7 +229,8 @@ export class MoeHelper {
   async findBestChatFunction(
     embedding,
     embeddingMap,
-    contentJson
+    contentJson,
+    userPermissions: UserPermissions
   ): Promise<{ bestScore: number; bestFunction: string }> {
     let scores: any = {};
     for (let checkFunction in embeddingMap.chat_function_map) {
@@ -249,12 +250,31 @@ export class MoeHelper {
       ([, valueA], [, valueB]) => (valueB as number) - (valueA as number)
     );
     const sortedScores = Object.fromEntries(sortedEntries);
-    const bestFunction = Object.keys(sortedScores)[0];
-    const bestScore: number = (sortedScores[bestFunction] as number) || 0;
+
+    // find best score of ability user has enabled
+    let bestScore: number = 0;
+    let bestFunction: string = "";
+    for (let abilityFunction in sortedScores) {
+      let baseFunction = abilityFunction.replace(/_\d+$/, "");
+      if (
+        userPermissions.applications.includes(baseFunction) ||
+        userPermissions.is_admin
+      ) {
+        bestFunction = abilityFunction;
+        bestScore = sortedScores[bestFunction] as number;
+        break;
+      }
+    }
     return { bestScore, bestFunction };
   }
 
-  private findBestSkillMatch(embedding, embeddingMap, contentJson, findType) {
+  private findBestSkillMatch(
+    embedding,
+    embeddingMap,
+    contentJson,
+    findType,
+    userPermissions: UserPermissions
+  ) {
     let scores: any = {};
     for (let checkFunction in embeddingMap[findType]) {
       const checkFunctionData = embeddingMap[findType][checkFunction];
@@ -273,28 +293,52 @@ export class MoeHelper {
       ([, valueA], [, valueB]) => (valueB as number) - (valueA as number)
     );
     const sortedScores = Object.fromEntries(sortedEntries);
-    const bestSkillShortcut = Object.keys(sortedScores)[0];
-    const bestMoeScore: number =
-      (sortedScores[bestSkillShortcut] as number) || 0;
+
+    // find best score of a skill user has enabled
+    let bestMoeScore: number = 0;
+    let bestSkillShortcut: string = "";
+    for (let checkScore in sortedScores) {
+      const shortcutModel = this.spellbookService.getShortcutSkill(checkScore);
+      if (
+        userPermissions.skills.includes(shortcutModel) ||
+        userPermissions.is_admin
+      ) {
+        bestSkillShortcut = checkScore;
+        bestMoeScore = sortedScores[bestSkillShortcut] as number;
+        break;
+      }
+    }
     return { bestMoeScore, bestSkillShortcut };
   }
 
-  async findBestMoeSkill(embedding, embeddingMap, contentJson) {
+  async findBestMoeSkill(
+    embedding,
+    embeddingMap,
+    contentJson,
+    userPermissions: UserPermissions
+  ) {
     const { bestMoeScore, bestSkillShortcut } = this.findBestSkillMatch(
       embedding,
       embeddingMap,
       contentJson,
-      "skill_domain_map"
+      "skill_domain_map",
+      userPermissions
     );
     return { bestMoeScore, bestSkillShortcut };
   }
 
-  async findBestMoeFunction(embedding, embeddingMap, contentJson) {
+  async findBestMoeFunction(
+    embedding,
+    embeddingMap,
+    contentJson,
+    userPermissions: UserPermissions
+  ) {
     const { bestMoeScore, bestSkillShortcut } = this.findBestSkillMatch(
       embedding,
       embeddingMap,
       contentJson,
-      "skill_function_map"
+      "skill_function_map",
+      userPermissions
     );
     return { bestMoeScore, bestSkillShortcut };
   }
@@ -406,7 +450,7 @@ export class MoeHelper {
       // map dynamic functions
       for (let dynamicFunctionId in embeddingInfo.dynamic_functions) {
         const currentFunc = embeddingInfo.dynamic_functions[dynamicFunctionId];
-        const functionName = `dynamic_function_${currentFunc.index}`;
+        const functionName = `chat_ability_dynamic_functions_${currentFunc.index}`;
         if (currentFunc.definition.function_description == embedding) {
           ret.chat_function_map[functionName] = [embeddings[embedding][0]];
         }
@@ -486,7 +530,8 @@ export class MoeHelper {
     shortcutData: string,
     message: any,
     skillConfig: any,
-    availableLanguageModels: any
+    availableLanguageModels: any,
+    userPermissions: UserPermissions
   ) {
     const regex = emojiRegex();
     let match = regex.exec(shortcutData);
@@ -563,8 +608,14 @@ export class MoeHelper {
             match[0]
           );
           if (shortcutFunction) {
-            functionManuallySelected = true;
-            aiShortcutsArray.push(match[0]);
+            let baseFunction = shortcutFunction.replace(/_\d+$/, "");
+            if (
+              userPermissions.applications.includes(baseFunction) ||
+              userPermissions.is_admin
+            ) {
+              functionManuallySelected = true;
+              aiShortcutsArray.push(match[0]);
+            }
           }
         }
 
@@ -573,9 +624,14 @@ export class MoeHelper {
             match[0]
           );
           if (shortcutSkill) {
-            manuallySelectedModel = shortcutSkill;
-            modelManuallySelected = true;
-            aiShortcutsArray.push(match[0]);
+            if (
+              userPermissions.skills.includes(shortcutSkill) ||
+              userPermissions.is_admin
+            ) {
+              manuallySelectedModel = shortcutSkill;
+              modelManuallySelected = true;
+              aiShortcutsArray.push(match[0]);
+            }
           }
         }
       }
@@ -598,7 +654,7 @@ export class MoeHelper {
     };
   }
 
-  selectDefaultLanguageModel(skillConfig): string {
+  selectDefaultLanguageModel(skillConfig, userPermissions): string {
     let availableLanguageModels =
       this.spellbookService.getOnlineSkillFromType("language_model");
 
@@ -608,21 +664,28 @@ export class MoeHelper {
       );
     }
 
+    const clippedList = [];
+    for (let i = 0; i < availableLanguageModels.length; i++) {
+      if (
+        userPermissions.skills.includes(availableLanguageModels[i]) ||
+        userPermissions.is_admin
+      )
+        clippedList.push(availableLanguageModels[i]);
+    }
+
     // select the default model
-    let ret = availableLanguageModels ? availableLanguageModels[0] : null;
+    let ret = clippedList ? clippedList[0] : null;
     if (
-      skillConfig &&
-      skillConfig.preferred_model &&
-      availableLanguageModels.includes(skillConfig.preferred_model)
+      skillConfig?.preferred_model &&
+      clippedList.includes(skillConfig.preferred_model)
     ) {
       return skillConfig.preferred_model;
     }
 
     // select primary model if available
     if (
-      skillConfig &&
-      skillConfig.secondary_model &&
-      availableLanguageModels.includes(skillConfig.secondary_model)
+      skillConfig?.secondary_model &&
+      clippedList.includes(skillConfig.secondary_model)
     ) {
       return skillConfig.secondary_model;
     }

@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "🎶 This chat ability uses music generators provided by Elemental Golem to allow for music generation from a text prompt.",
   "icon": "asset/chat-ability/music-generator/music-icon.jpeg",
-  "unique_key": "music_generator",
+  "unique_key": "chat_ability_music_generator",
   "skill_dependencies": ["music_generation"],
   "shortcut": "🎶",
   "chat_ability": [

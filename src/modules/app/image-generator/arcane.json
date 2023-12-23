@@ -1,0 +1,69 @@
+{
+  "name": "app/image-generator",
+  "description": "App to generate images.",
+  "dependencies": [
+    "spellbook/core",
+    "core/express",
+    "core/amqp",
+    "core/socket"
+  ],
+  "sequelize_model": [
+    {
+      "name": "GeneratedImage",
+      "class_file": "model/generated.image.model",
+      "factory_file": "model/generated.image.model.factory",
+      "graphql_query": [
+        {
+          "query": "getGeneratedImage",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "GeneratedImageQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteGeneratedImage",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "GeneratedImageDelete",
+          "resolver_file": "image-generator",
+          "resolver_function": "deleteGeneratedImage"
+        }
+      ]
+    }
+  ],
+
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "image-generator",
+          "function": "handleGenerateImage",
+          "filter": "command:app_image_generator"
+        }
+      ]
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "image-generator",
+          "function": "handleImage",
+          "filter": "command:app_image_generator"
+        }
+      ]
+    }
+  ]
+}

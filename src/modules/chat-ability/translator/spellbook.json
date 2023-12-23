@@ -7,7 +7,7 @@
   "description": "Translates text from one language to another.",
   "icon": "asset/chat-ability/translator/translate-icon.jpeg",
   "skill_dependencies": ["alma_13b_exllama|alma_7b_exllama"],
-  "unique_key": "language_translator",
+  "unique_key": "chat_ability_language_translator",
   "shortcut": "🈸",
   "chat_ability": [
     {

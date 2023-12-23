@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Analyzes an image.",
   "icon": "asset/chat-ability/image-analyzer/analyzer-icon.jpeg",
-  "unique_key": "image_analyzer",
+  "unique_key": "chat_ability_image_analyzer",
   "skill_dependencies": ["object_detection", "image_classification"],
   "shortcut": "👁‍🗨",
   "chat_ability": [
@@ -52,7 +52,7 @@
       "parent": "ability_settings",
       "group": "configuration",
       "sort_order": 5000,
-      "icon": "pi pi-fw pi-images",
+      "icon": "pi pi-fw pi-camera",
       "route": "settings/chat-ability/image-analyzer"
     }
   ],

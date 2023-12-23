@@ -10,6 +10,7 @@ interface ChatConversationMessageAttributes {
   shortcuts: string;
   role: "user" | "assistant"; // role can only be either "user" or "assistant"
   conversation_id: number;
+  user_id: number;
   parent_id: number | null; // foreign key to refer back to parent message, can be null if no parent
   active_child_id: number | null; // foreign key for the active child message, can be null if no child message is active
   num_children: number; // number of child messages
@@ -28,6 +29,7 @@ class ChatConversationMessage
   public shortcuts!: string;
   public role!: "user" | "assistant"; // role can only be either "user" or "assistant"
   conversation_id: number;
+  user_id: number;
   public parent_id!: number | null; // foreign key to refer back to parent message, can be null if no parent
   public active_child_id!: number | null; // foreign key for the active child message, can be null if no child message is active
   public num_children!: number; // number of child messages

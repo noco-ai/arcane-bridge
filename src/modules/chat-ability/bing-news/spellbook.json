@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Searches current news using Bing API.",
   "icon": "asset/chat-ability/bing-news/bing-icon.jpeg",
-  "unique_key": "news_search",
+  "unique_key": "chat_ability_news_search",
   "shortcut": "📰",
   "skill_dependencies": ["openai_gpt_35"],
   "configuration": {

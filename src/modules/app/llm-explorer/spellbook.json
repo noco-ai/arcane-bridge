@@ -1,0 +1,24 @@
+{
+  "label": "LLM Explorer",
+  "version": "1.0.0",
+  "spell_label": "Lexicon Enigma",
+  "module": "app/llm-explorer",
+  "description": "API and UI editor for multi shot use of LLM models.",
+  "dependencies": ["spellbook/core"],
+  "icon": "asset/app/llm-explorer/llm-explorer.jpeg",
+  "unique_key": "app_llm_explorer",
+  "can_remove": true,
+  "skill_dependencies": ["language_model"],
+  "menu_item": [
+    {
+      "label": "LLM Explorer",
+      "spell_label": "Lexicon Enigma",
+      "group": "spells",
+      "sort_order": 100,
+      "icon": "pi pi-fw pi-compass",
+      "route": "llm-explorer",
+      "key": "app_llm_explorer",
+      "spell_index": "app/llm_explorer"
+    }
+  ]
+}

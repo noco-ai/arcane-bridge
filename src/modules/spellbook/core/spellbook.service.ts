@@ -283,6 +283,15 @@ export class SpellbookService implements SpellbookServiceInterface {
       return true;
     }
 
+    // check if user is an admin
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+    if (!userPermissions.is_admin) {
+      this.logger.error(`only admin accounts can update module settings`);
+      return true;
+    }
+
     // load module data from db
     const spellbookModel = this.modelService.create("SpellbookModule");
     const loadModule = await spellbookModel.findOne({
@@ -312,13 +321,52 @@ export class SpellbookService implements SpellbookServiceInterface {
     return true;
   }
 
+  private filterMenuItems(jsonObj, allowedList, isAdmin: boolean) {
+    // Filter the main array
+    return jsonObj.filter((item) => {
+      if (isAdmin) return true;
+      if (item.admin_only && !isAdmin) return false;
+      if (item.item_module && !allowedList.includes(item.item_module))
+        return false;
+
+      if (Array.isArray(item.items)) {
+        item.items = this.filterMenuItems(item.items, allowedList, isAdmin);
+      }
+      return true;
+    });
+  }
+
+  private filterEmptyMenuItems(jsonObj) {
+    return jsonObj.filter((item) => {
+      if (Array.isArray(item.items)) {
+        if (!item.items.length) return false;
+        item.items = this.filterEmptyMenuItems(item.items);
+      }
+      return true;
+    });
+  }
+
   @PluginSystem
   async handleGetMenu(message: SocketMessage): Promise<boolean> {
-    // send the menu back to the sender
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+    userPermissions.applications.push("spellbook_core");
+    let customMenu = JSON.parse(JSON.stringify(this.fullMenu));
+
+    // filter by access rights
+    this.filterMenuItems(
+      customMenu,
+      userPermissions.applications,
+      userPermissions.is_admin
+    );
+
     const updatedMenu = this.updateMenuStyle(
-      this.fullMenu,
+      customMenu,
       message.payload.spell_labels
     );
+
+    this.filterEmptyMenuItems(updatedMenu);
     this.socketService.emit(message.socket_id, "menu", updatedMenu);
     return true;
   }
@@ -437,7 +485,16 @@ export class SpellbookService implements SpellbookServiceInterface {
       }
     }
 
-    this.socketService.emit(message.socket_id, "spell_list", this.spellDetails);
+    // filter by access rights
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+    const spellDetails = JSON.parse(JSON.stringify(this.spellDetails));
+    for (let i = 0; i < spellDetails.length; i++) {
+      if (!userPermissions.is_admin) spellDetails[i].configuration = null;
+    }
+
+    this.socketService.emit(message.socket_id, "spell_list", spellDetails);
     return true;
   }
 
@@ -470,6 +527,7 @@ export class SpellbookService implements SpellbookServiceInterface {
   async handleGetConfiguration(message: SocketMessage): Promise<boolean> {
     const post = message.payload.payload;
     const vaultPath = post.vault_path;
+
     let configData = await this.vaultService.getGroup(vaultPath);
     if (!configData) configData = {};
 
@@ -515,7 +573,16 @@ export class SpellbookService implements SpellbookServiceInterface {
   }
 
   @PluginSystem
+  private async userIsAdmin(message: SocketMessage): Promise<boolean> {
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+    return userPermissions.is_admin;
+  }
+
+  @PluginSystem
   async handleInstallSkill(message: SocketMessage): Promise<boolean> {
+    if (!(await this.userIsAdmin(message))) return true;
     const ret = await this.publishCommand(
       "golem",
       message.payload.payload.server_id,
@@ -533,6 +600,7 @@ export class SpellbookService implements SpellbookServiceInterface {
 
   @PluginSystem
   async handleStopSkill(message: SocketMessage): Promise<boolean> {
+    if (!(await this.userIsAdmin(message))) return true;
     const serverId = message.payload.payload.server_id;
     delete message.payload.payload.server_id;
 
@@ -561,6 +629,7 @@ export class SpellbookService implements SpellbookServiceInterface {
 
   @PluginSystem
   async handleConfigureSkill(message: SocketMessage): Promise<boolean> {
+    if (!(await this.userIsAdmin(message))) return true;
     const post = message.payload.payload;
     const vaultPath = post.vault_path;
     delete post.vault_path;
@@ -580,6 +649,7 @@ export class SpellbookService implements SpellbookServiceInterface {
 
   @PluginSystem
   async handleCustomSkill(message: SocketMessage): Promise<boolean> {
+    if (!(await this.userIsAdmin(message))) return true;
     let validateFailed = false;
     let toastSummary = `Custom skill is not valid`;
     let toastSeverity = "error";

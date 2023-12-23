@@ -7,7 +7,7 @@
   "description": "Generates a speech file from text.",
   "icon": "asset/chat-ability/text-to-speech/tts-icon.jpeg",
   "skill_dependencies": ["text_to_speech"],
-  "unique_key": "text_to_speech",
+  "unique_key": "chat_ability_text_to_speech",
   "shortcut": "💬",
   "chat_ability": [
     {

@@ -7,12 +7,14 @@ import {
   SocketConsumerInterface,
   SocketOpenSession,
   SocketsServiceInterface,
+  VaultServiceInterface,
 } from "types";
 import { PluginSystem } from "../../../plugin";
 
 export class SocketsService implements SocketsServiceInterface {
   private express: ExpressServiceInterface;
   private logger: LoggerServiceInterface;
+  private vault: VaultServiceInterface;
   private io: SocketIOServer;
   private openSessions: Map<string, SocketOpenSession>;
   private consumers: Map<string, Array<SocketConsumerInterface>>;
@@ -23,6 +25,7 @@ export class SocketsService implements SocketsServiceInterface {
   ) {
     this.express = services["ExpressService"];
     this.logger = services["LoggerService"];
+    this.vault = services["VaultService"];
   }
 
   @PluginSystem
@@ -33,6 +36,7 @@ export class SocketsService implements SocketsServiceInterface {
         icon: "🔌",
       });
       this.openSessions.delete(socket.id);
+      this.vault.cleanAuthCache(socket.id);
     }
 
     this.logger.info(`socket disconnected ${socket.id}`, {
@@ -47,6 +51,21 @@ export class SocketsService implements SocketsServiceInterface {
 
       // on socket event
       socket.on(eventName, async (payload) => {
+        // make sure the user is has access to this event
+        const auth = socket.handshake.headers.authorization;
+        const userId = await this.vault.validateAuthToken(
+          auth,
+          socket.id,
+          eventName
+        );
+        if (!userId) {
+          this.logger.warn(`invalid token provided with socket message`, {
+            icon: "🔌",
+          });
+          socket.emit("auth_redirect", {});
+          return;
+        }
+
         for (let i = 0; i < consumers.length; i++) {
           const consumer: SocketConsumerInterface = consumers[i];
           try {
@@ -62,6 +81,7 @@ export class SocketsService implements SocketsServiceInterface {
               event: eventName,
               socket_id: socket.id,
               payload: payload,
+              user_id: userId,
             });
           } catch (err) {
             this.logger.error(
@@ -79,6 +99,22 @@ export class SocketsService implements SocketsServiceInterface {
   async setupServer() {
     // client has connected using socket.io
     this.io.on("connection", async (socket: SocketIOSocket) => {
+      const auth = socket.handshake.headers.authorization;
+      const userId = await this.vault.validateAuthToken(
+        auth,
+        socket.id,
+        "connection"
+      );
+      if (!userId) {
+        this.logger.warn(
+          `socket connected rejected ${socket.id}, bad token provided`,
+          {
+            icon: "🔌",
+          }
+        );
+        socket.emit("auth_redirect", {});
+        return;
+      }
       this.logger.info(`socket connected ${socket.id}`, { icon: "🔌" });
 
       // select chat queue to use
@@ -95,7 +131,18 @@ export class SocketsService implements SocketsServiceInterface {
 
       this.configureEvents(socket);
 
-      socket.on("disconnect", () => {
+      socket.on("disconnect", async () => {
+        if (
+          !(await this.vault.validateAuthToken(auth, socket.id, "disconnect"))
+        ) {
+          this.logger.warn(
+            `socket disconnect rejected ${socket.id}, bad token provided`,
+            {
+              icon: "🔌",
+            }
+          );
+          return;
+        }
         this.handleDisconnect(socket);
       });
 
@@ -109,6 +156,7 @@ export class SocketsService implements SocketsServiceInterface {
           event: "connection",
           socket_id: socket.id,
           payload: {},
+          user_id: userId,
         });
       }
     });

@@ -1,4 +1,38 @@
+import { UserAuthentication } from "./authentication";
 import { ServiceInterface } from "./core";
+
+export type User = {
+  groups: string[];
+  id: number;
+  is_admin: boolean;
+  is_enabled: boolean;
+  password: string;
+  password_confirm: string;
+  username: string;
+};
+
+export type Group = {
+  applications: string[];
+  chat_abilities: string[];
+  description: string;
+  name: string;
+  skills: string[];
+  unique_key: string;
+};
+
+export type Users = {
+  [key: string]: User;
+};
+
+export type Groups = {
+  [key: string]: Group;
+};
+
+export type UserPermissions = {
+  skills: string[];
+  applications: string[];
+  is_admin: boolean;
+};
 
 export interface VaultCliOptions {
   vaultHost: string;
@@ -26,4 +60,13 @@ export interface VaultServiceInterface extends ServiceInterface {
   getApplicationSetting(value: string): number | string | boolean;
   getBaseUrl(): string;
   getWorkspaceUrl(): string;
+  validateAuthToken(
+    token: string,
+    socketId: string,
+    eventName: string,
+    userData?: UserAuthentication
+  ): Promise<number>;
+  cleanAuthCache(socketId: string): void;
+  getAuthUser(token: string): Promise<UserAuthentication>;
+  getUserPermissions(userId: number): Promise<UserPermissions>;
 }

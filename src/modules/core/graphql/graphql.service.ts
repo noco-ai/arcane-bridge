@@ -1,6 +1,6 @@
 import { Model } from "sequelize";
 import { PluginSystem } from "../../../plugin";
-import { createHandler } from "graphql-http/lib/use/express";
+import { RequestContext, createHandler } from "graphql-http/lib/use/express";
 import {
   GraphQLObjectType,
   GraphQLString,
@@ -21,15 +21,23 @@ import {
   LoggerServiceInterface,
   SequelizeServiceInterface,
   ServicesConstructorInterface,
+  VaultServiceInterface,
 } from "types";
 
-export class GarphqlService implements GraphQLServiceInterface {
+interface GraphQLModelInterface {
+  typeDefinition: GraphQLObjectType;
+  isUserSpecific: boolean;
+}
+
+export class GraphqlService implements GraphQLServiceInterface {
   private logger: LoggerServiceInterface;
   private expressService: ExpressServiceInterface;
   private sequelizeService: SequelizeServiceInterface;
   private classFactoryService: ClassFactoryServiceInterface;
+  private vault: VaultServiceInterface;
   private queryList: GraphQLQueryInterface[];
   private mutationList: GraphQLMutationInterface[];
+  private userResourceMap: Map<string, boolean>;
 
   constructor(
     cliParams: EmptyCliOptions,
@@ -39,8 +47,10 @@ export class GarphqlService implements GraphQLServiceInterface {
     this.expressService = services["ExpressService"];
     this.sequelizeService = services["SequelizeService"];
     this.classFactoryService = services["ClassFactoryService"];
+    this.vault = services["VaultService"];
     this.queryList = [];
     this.mutationList = [];
+    this.userResourceMap = new Map();
   }
 
   @PluginSystem
@@ -49,8 +59,9 @@ export class GarphqlService implements GraphQLServiceInterface {
       case "string":
       case "text":
         return GraphQLString;
-      case "integer":
       case "bigint":
+        return GraphQLFloat;
+      case "integer":
       case "time":
         return GraphQLInt;
       case "float":
@@ -75,8 +86,9 @@ export class GarphqlService implements GraphQLServiceInterface {
     name: string,
     model: Model,
     skipFields: string[] = []
-  ): GraphQLObjectType {
+  ): GraphQLModelInterface {
     const fields = {};
+    let isUserSpecific = false;
 
     // Iterate over the model's fields
     for (let [key, value] of Object.entries(model["rawAttributes"])) {
@@ -84,13 +96,17 @@ export class GarphqlService implements GraphQLServiceInterface {
         fields[key] = {
           type: this.getGraphQLType((value as any).type.key),
         };
+        if (key === "user_id") isUserSpecific = true;
       }
     }
 
-    return new GraphQLObjectType({
-      name,
-      fields,
-    });
+    return {
+      typeDefinition: new GraphQLObjectType({
+        name,
+        fields,
+      }),
+      isUserSpecific: isUserSpecific,
+    };
   }
 
   @PluginSystem
@@ -109,6 +125,58 @@ export class GarphqlService implements GraphQLServiceInterface {
   }
 
   @PluginSystem
+  private applyAuthResolvers(queryFields, mutationFields) {
+    for (const key in mutationFields) {
+      const originalResolve = mutationFields[key].resolve;
+      mutationFields[key].resolve = async (...args) => {
+        const headers = args[2].req.headers;
+        const userId = await this.vault.validateAuthToken(
+          headers["authorization"],
+          headers["socket-id"],
+          "graphql_query"
+        );
+
+        if (!userId) {
+          this.logger.info(`invalid token provided to graphql endpoint`);
+          throw new Error("Invalid token provided");
+        }
+
+        // is a user specific resource
+        if (this.userResourceMap.has(args[3].fieldName)) {
+          args[3].variableValues.user_id = userId;
+          args[1].user_id = userId;
+        }
+        return await originalResolve(...args);
+      };
+    }
+
+    for (const key in queryFields) {
+      const originalResolve = queryFields[key].resolve;
+      queryFields[key].resolve = async (...args) => {
+        // check to see if this is a valid user making the request
+        const headers = args[2].req.headers;
+        const userId = await this.vault.validateAuthToken(
+          headers["authorization"],
+          headers["socket-id"],
+          "graphql_query"
+        );
+
+        if (!userId) {
+          this.logger.info(`invalid token provided to graphql endpoint`);
+          throw new Error("Invalid token provided");
+        }
+
+        // is a user specific resource
+        if (this.userResourceMap.has(args[3].fieldName)) {
+          args[3].variableValues.user_id = userId;
+          args[1].user_id = userId;
+        }
+        return await originalResolve(...args);
+      };
+    }
+  }
+
+  @PluginSystem
   async afterConfig(): Promise<boolean> {
     let queryFields = {};
     let mutationFields = {};
@@ -119,7 +187,7 @@ export class GarphqlService implements GraphQLServiceInterface {
       const loadModel = this.sequelizeService.create(mutation.model_name);
 
       // build the schema for the model
-      const modelType = this.modelToGraphQLObjectType(
+      const modelType: GraphQLModelInterface = this.modelToGraphQLObjectType(
         mutation.schema_type,
         loadModel,
         []
@@ -131,12 +199,19 @@ export class GarphqlService implements GraphQLServiceInterface {
         args[arg.name] = { type: this.getGraphQLType(arg.type) };
       }
 
+      // require a user id as a parameter if is a user specific table
+      if (modelType.isUserSpecific)
+        args["user_id"] = { type: this.getGraphQLType("int") };
+
+      // keep track of user specific queries
+      this.userResourceMap.set(mutation.mutation, modelType.isUserSpecific);
+
       const resolverClass = this.classFactoryService.create(
         mutation.module,
         mutation.resolver_file
       );
       mutationFields[mutation.mutation] = {
-        type: modelType,
+        type: modelType.typeDefinition,
         resolve: async (...args) => {
           return await resolverClass[mutation.resolver_function](
             args[1],
@@ -159,6 +234,9 @@ export class GarphqlService implements GraphQLServiceInterface {
         query.exclude_data
       );
 
+      // keep track of user specific queries
+      this.userResourceMap.set(query.query, modelType.isUserSpecific);
+
       // build the args to use in where
       let args = {};
       for (let j = 0; j < query.args.length; j++) {
@@ -166,11 +244,15 @@ export class GarphqlService implements GraphQLServiceInterface {
         args[arg.name] = { type: this.getGraphQLType(arg.type) };
       }
 
+      // require a user id as a parameter if is a user specific table
+      if (modelType.isUserSpecific)
+        args["user_id"] = { type: this.getGraphQLType("int") };
+
       // set if this is a array or an object returned by graphql
       const type =
         query.response_type === "object"
-          ? modelType
-          : new GraphQLList(modelType);
+          ? modelType.typeDefinition
+          : new GraphQLList(modelType.typeDefinition);
 
       // add the query to the list
       queryFields[query.query] = {
@@ -179,6 +261,8 @@ export class GarphqlService implements GraphQLServiceInterface {
         args: args,
       };
     }
+
+    this.applyAuthResolvers(queryFields, mutationFields);
 
     // build the schema
     const schema = new GraphQLSchema({
@@ -194,7 +278,15 @@ export class GarphqlService implements GraphQLServiceInterface {
 
     // setup express w/ graphql
     const express = this.expressService.getExpress();
-    express.all("/graphql", createHandler({ schema }));
+    express.all(
+      "/graphql",
+      createHandler({
+        schema,
+        context: async (req, args) => {
+          return { req, args };
+        },
+      })
+    );
 
     this.logger.info(`graphql endpoint /graphql online`, {
       icon: "🔀",
@@ -204,4 +296,4 @@ export class GarphqlService implements GraphQLServiceInterface {
   }
 }
 
-export default GarphqlService;
+export default GraphqlService;
