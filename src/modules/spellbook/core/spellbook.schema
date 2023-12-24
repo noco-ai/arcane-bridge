@@ -248,6 +248,10 @@
                         "type": "boolean",
                         "default": true
                     },
+                    "admin_only": {
+                        "type": "boolean",
+                        "default": false
+                    },
                     "label": {
                         "type": "string"
                     },

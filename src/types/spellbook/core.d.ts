@@ -108,6 +108,7 @@ export interface MenuItem {
   sort_order: number;
   item_module: string;
   icon: string;
+  admin_only: boolean;
   routerLink: string;
   settings_link: string;
   style: string;
@@ -139,6 +140,7 @@ export interface SpellbookConfig {
 export interface SocketMessage {
   event: string;
   socket_id: string;
+  user_id: number;
   payload: any;
 }
 
@@ -187,11 +189,13 @@ interface WorkspaceServiceInterface {
   ): Promise<string[]>;
   setWorkspace(
     socketId: string,
+    userId: number,
     baseWorkspace: string,
     currentWorkspace: string
   ): Promise<void>;
   setCurrentWorkspace(
     socketId: string,
+    userId: number,
     currentWorkspace: string,
     createDirectory?: boolean
   ): Promise<void>;
@@ -206,11 +210,18 @@ interface WorkspaceServiceInterface {
   saveFile(
     socketId: string,
     fileName: string,
-    content: string | Buffer
+    content: string | Buffer,
+    currentWorkspace?: boolean
   ): Promise<string>;
+  createFolder(socketId: string, folderPath: string);
   deleteFile(socketId: string, fileName: string): Promise<void>;
-  getFileUrl(socketId: string, filePath: string): Promise<string | null>;
+  getFileUrl(
+    socketId: string,
+    filePath: string,
+    accessCount?: number
+  ): Promise<string | null>;
   checkInWorkspaces(socketId: string, filePath: string): Promise<string | null>;
   getWorkspaceFolder(socketId: string): string;
   deleteFolder(folderPath: string): Promise<void>;
+  checkTempAccessKey(key: string): number;
 }

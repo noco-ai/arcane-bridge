@@ -7,7 +7,7 @@
   "description": "Creates function for handling simple tasks based off a function description.",
   "icon": "asset/chat-ability/dynamic-functions/dynamic.jpeg",
   "skill_dependencies": ["openai_gpt_4"],
-  "unique_key": "wizards_wand",
+  "unique_key": "chat_ability_dynamic_functions",
   "shortcut": "🧪",
   "chat_ability": [
     {

@@ -8,6 +8,7 @@ import {
   ServicesConstructorInterface,
 } from "types";
 import { PluginSystem } from "../../../plugin";
+import cookieParser from "cookie-parser";
 
 interface ExpressCliOptions {
   port: number;
@@ -25,11 +26,24 @@ export class ExpressService implements ExpressServiceInterface {
   ) {
     this.logger = services["LoggerService"];
 
+    var corsOptions = {
+      origin: function (origin, callback) {
+        if (origin === undefined) {
+          callback(null, true);
+        } else {
+          callback(null, origin);
+        }
+      },
+      credentials: true,
+      optionsSuccessStatus: 200,
+    };
+
     // setup the http server classes
     this.http = express();
     this.server = new http.Server(this.http);
     this.http.use(express.json());
-    this.http.use(cors());
+    this.http.use(cors(corsOptions));
+    this.http.use(cookieParser());
     this.port = cliParams.port || 3000;
 
     this.http.use((req, res, next) => {

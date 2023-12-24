@@ -1,7 +1,7 @@
 {
   "name": "core/express",
   "description": "Provides the core HTTP(s) server to the application",
-  "dependencies": ["core/logger", "core/class-factory"],
+  "dependencies": ["core/logger", "core/class-factory", "core/socket"],
   "service": [
     {
       "class_name": "ExpressService",

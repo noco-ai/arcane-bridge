@@ -1,3 +1,4 @@
+import { UserPermissions } from "types/core/vault";
 import { ChatMessage, OnlineSkill } from "./core";
 
 export interface ProgressBarUpdate {
@@ -10,6 +11,7 @@ export interface ActivateConversation {
   num_jobs: number;
   num_complete: number;
   router_config: string[];
+  user_permissions: UserPermissions;
   icons: string[];
   user_shortcuts: string;
   shortcuts: string;
@@ -29,6 +31,7 @@ export interface ActivateConversation {
   cursor_index: number;
   cursor_tail: string;
   guessed_function: null | any;
+  user_id: number;
 }
 
 export interface EmbeddingInfo {

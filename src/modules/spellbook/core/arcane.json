@@ -31,6 +31,15 @@
   ],
   "socket_event": [
     {
+      "event": "disconnect",
+      "consumer": [
+        {
+          "class_name": "route/workspace.serve",
+          "function": "handleSocketDisconnect"
+        }
+      ]
+    },
+    {
       "event": "command",
       "consumer": [
         {

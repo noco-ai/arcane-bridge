@@ -86,6 +86,8 @@ export class LoggerService implements LoggerServiceInterface {
       return;
     }
 
+    if (!options) return;
+
     const icon = options.icon || "";
     const logLevelText = level.toUpperCase().padEnd(5, " ");
     const date = new Date().toISOString();
@@ -111,6 +113,7 @@ export class LoggerService implements LoggerServiceInterface {
     options: LogOptions = {},
     ...args: any[]
   ): void {
+    options = !options ? {} : options;
     this.log(
       "error",
       message,
@@ -125,6 +128,7 @@ export class LoggerService implements LoggerServiceInterface {
 
   @PluginSystem
   public warn(message: string, options: LogOptions = {}, ...args: any[]): void {
+    options = !options ? {} : options;
     this.log(
       "warn",
       message,
@@ -139,6 +143,7 @@ export class LoggerService implements LoggerServiceInterface {
 
   @PluginSystem
   public info(message: string, options: LogOptions = {}, ...args: any[]): void {
+    options = !options ? {} : options;
     this.log(
       "info",
       message,
@@ -156,6 +161,7 @@ export class LoggerService implements LoggerServiceInterface {
     options: LogOptions = {},
     ...args: any[]
   ): void {
+    options = !options ? {} : options;
     this.log(
       "debug",
       message,

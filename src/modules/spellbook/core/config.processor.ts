@@ -247,6 +247,7 @@ class SpellbookConfigProcessor implements ProcessorInterface {
           items: null,
           routerLink: item.route,
           sort_order: item.sort_order,
+          admin_only: item.admin_only,
           settings_link: module,
           item_module: currentModule.unique_key,
           style: "",

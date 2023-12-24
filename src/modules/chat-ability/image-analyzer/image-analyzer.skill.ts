@@ -173,7 +173,11 @@ class ImageGeneratorSkill
     }
   }
 
-  private async getImageUrl(filename, socketId): Promise<string | null> {
+  private async getImageUrl(
+    filename,
+    socketId,
+    accessCount
+  ): Promise<string | null> {
     let foundFile = null;
     if (filename) {
       foundFile = await this.workspaceService.checkInWorkspaces(
@@ -195,7 +199,11 @@ class ImageGeneratorSkill
       );
       return null;
     }
-    return await this.workspaceService.getFileUrl(socketId, foundFile);
+    return await this.workspaceService.getFileUrl(
+      socketId,
+      foundFile,
+      accessCount
+    );
   }
 
   async executeDetectObjects(
@@ -219,7 +227,8 @@ class ImageGeneratorSkill
 
     let foundFile = await this.getImageUrl(
       skillData.image_filename,
-      socketMessage.socket_id
+      socketMessage.socket_id,
+      detectors.length * 2
     );
     if (!foundFile) return true;
 
@@ -232,6 +241,7 @@ class ImageGeneratorSkill
         current_model: 0,
         img_url: foundFile,
       });
+
       await this.spellbookService.publishCommand(
         "golem_skill",
         detectors[0],
@@ -269,7 +279,8 @@ class ImageGeneratorSkill
 
     let foundFile = await this.getImageUrl(
       skillData.image_filename,
-      socketMessage.socket_id
+      socketMessage.socket_id,
+      classifier.length * 2
     );
     if (!foundFile) return true;
 

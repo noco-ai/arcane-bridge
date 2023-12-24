@@ -6,7 +6,7 @@
   "dependencies": ["spellbook/core"],
   "description": "Provides current weather information using the Accuweather API.",
   "icon": "asset/chat-ability/accuweather/weather-icon.jpeg",
-  "unique_key": "current_weather",
+  "unique_key": "chat_ability_current_weather",
   "shortcut": "🌞",
   "configuration": {
     "vault_path": "chat_ability/accuweather",
@@ -48,7 +48,7 @@
   "menu_item": [
     {
       "label": "Current Weather",
-      "spell_label": "Current Weather",
+      "spell_label": "Scroll of Atmospheara",
       "parent": "ability_settings",
       "group": "configuration",
       "sort_order": 1000,

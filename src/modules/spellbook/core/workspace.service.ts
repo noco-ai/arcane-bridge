@@ -7,6 +7,7 @@ import {
   VaultServiceInterface,
   WorkspaceServiceInterface,
 } from "types";
+import { v4 as uuidv4 } from "uuid";
 
 interface WorkspaceDetails {
   baseWorkspace: string;
@@ -18,6 +19,7 @@ export class WorkspaceService implements WorkspaceServiceInterface {
   private logger: LoggerServiceInterface;
   private vaultService: VaultServiceInterface;
   private workspaces: Map<string, WorkspaceDetails> = new Map();
+  private tempAccessKeys: Map<string, number> = new Map();
   private readonly workingDir: string = "./workspace/";
 
   constructor(
@@ -34,6 +36,7 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     files: string[]
   ): Promise<string[]> {
     try {
+      this.logger.info(`moving files to current workspace`, { icon: "💾" });
       const workspaceDetails = this.workspaces.get(socketId) || null;
       const moveTo = workspaceDetails.currentWorkspace;
       if (!(await fs.access(moveTo).catch(() => undefined))) {
@@ -55,11 +58,15 @@ export class WorkspaceService implements WorkspaceServiceInterface {
 
   async setWorkspace(
     socketId: string,
+    userId: number,
     baseWorkspace: string,
     currentWorkspace: string
   ): Promise<void> {
-    baseWorkspace = path.join(this.workingDir, baseWorkspace);
-    currentWorkspace = path.join(this.workingDir, currentWorkspace) + "/";
+    baseWorkspace = path.join(
+      this.workingDir,
+      path.join("" + userId, baseWorkspace)
+    );
+    currentWorkspace = baseWorkspace;
     await fs.mkdir(baseWorkspace, { recursive: true });
     //await fs.mkdir(currentWorkspace, { recursive: true });
     this.workspaces.set(socketId, { baseWorkspace, currentWorkspace });
@@ -71,10 +78,14 @@ export class WorkspaceService implements WorkspaceServiceInterface {
 
   async setCurrentWorkspace(
     socketId: string,
+    userId: number,
     currentWorkspace: string,
     createDirectory: boolean = false
   ): Promise<void> {
-    currentWorkspace = path.join(this.workingDir, currentWorkspace) + "/";
+    currentWorkspace =
+      path.join(this.workingDir, path.join("" + userId, currentWorkspace)) +
+      "/";
+
     const workspaceDetails = this.workspaces.get(socketId);
     workspaceDetails.currentWorkspace = currentWorkspace;
     this.workspaces.set(socketId, workspaceDetails);
@@ -176,12 +187,18 @@ export class WorkspaceService implements WorkspaceServiceInterface {
   async saveFile(
     socketId: string,
     fileName: string,
-    content: string | Buffer
+    content: string | Buffer,
+    currentWorkspace: boolean = true
   ): Promise<string> {
     const workspaceDetails = this.workspaces.get(socketId) || null;
     if (!workspaceDetails) return null;
-    await fs.mkdir(workspaceDetails.currentWorkspace, { recursive: true });
-    const savePath = path.join(workspaceDetails.currentWorkspace, fileName);
+    let savePath = "";
+    if (currentWorkspace) {
+      await fs.mkdir(workspaceDetails.currentWorkspace, { recursive: true });
+      savePath = path.join(workspaceDetails.currentWorkspace, fileName);
+    } else {
+      savePath = path.join(workspaceDetails.baseWorkspace, fileName);
+    }
     this.logger.info(`saving workspace file ${savePath}`);
     await fs.writeFile(savePath, content);
     return savePath;
@@ -202,11 +219,36 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     }
   }
 
-  async getFileUrl(socketId: string, filePath: string): Promise<string | null> {
+  async getFileUrl(
+    socketId: string,
+    filePath: string,
+    accessCount: number = 0
+  ): Promise<string | null> {
     const fullPath = await this.checkInWorkspaces(socketId, filePath);
     if (!fullPath) return null;
+
     const baseUrl = this.vaultService.getWorkspaceUrl();
+    if (accessCount) {
+      const accessKey = uuidv4();
+      this.tempAccessKeys.set(accessKey, accessCount);
+      return baseUrl + fullPath + `?key=` + encodeURIComponent(accessKey);
+    }
     return baseUrl + fullPath;
+  }
+
+  checkTempAccessKey(key: string): number {
+    if (!this.tempAccessKeys.has(key)) return 0;
+    const last = this.tempAccessKeys.get(key);
+    if (last > 1) this.tempAccessKeys.set(key, last - 1);
+    else this.tempAccessKeys.delete(key);
+    return last;
+  }
+
+  async createFolder(socketId: string, folderPath: string) {
+    const workspaceDetails = this.workspaces.get(socketId) || null;
+    if (!workspaceDetails) return null;
+    const newFolder = path.join(workspaceDetails.baseWorkspace, folderPath);
+    await fs.mkdir(newFolder, { recursive: true });
   }
 
   async checkInWorkspaces(

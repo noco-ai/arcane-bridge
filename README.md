@@ -138,6 +138,19 @@ curl -X POST "http://localhost:3000/api/v1/skill/execute/dream_shaper_image_gen"
 }'
 ```
 
+## Upgrade from v0.1.0
+
+The following SQL commands need to run when upgrading from v0.1.0.
+
+- ALTER TABLE chat_conversation_message ADD COLUMN user_id int(10) unsigned NOT NULL AFTER conversation_id;
+- ALTER TABLE chat_conversation ADD COLUMN user_id int(10) unsigned NOT NULL AFTER id;
+- ALTER TABLE chat_conversation ADD COLUMN mirostat int(10) unsigned DEFAULT 0;
+- ALTER TABLE chat_conversation ADD COLUMN mirostat_tau FLOAT DEFAULT 5;
+- ALTER TABLE chat_conversation ADD COLUMN mirostat_eta FLOAT DEFAULT 0.1;
+- ALTER TABLE chat_conversation ADD COLUMN min_p FLOAT DEFAULT 0.05;
+- ALTER TABLE chat_conversation MODIFY COLUMN top_k int(10) unsigned DEFAULT 50;
+- ALTER TABLE chat_conversation MODIFY COLUMN seed bigint(20) DEFAULT -1;
+
 ## Chat Abilities
 
 Chat Abilities allow extending local LLMs to call external services like models running on the backed and third-party APIs. These are

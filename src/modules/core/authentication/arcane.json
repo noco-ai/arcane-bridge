@@ -1,0 +1,64 @@
+{
+  "name": "core/authentication",
+  "description": "Provides the core service for validating users",
+  "dependencies": ["core/vault", "core/class-factory", "core/socket"],
+  "service": [
+    {
+      "class_name": "AuthenticationService",
+      "class_file": "authentication.service",
+      "description": "Provides core service for validating users.",
+      "log_config": ["core/logger/amqp", "core/logger/general"]
+    }
+  ],
+  "express_route": [
+    {
+      "route": "/api/v1/token",
+      "route_file": "route/auth.token",
+      "route_function": "getToken",
+      "request_type": "post"
+    },
+    {
+      "route": "/api/v1/token",
+      "route_file": "route/auth.token",
+      "route_function": "getToken",
+      "request_type": "post"
+    }
+  ],
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "authentication.service",
+          "function": "handleSaveUserGroup",
+          "filter": "command:save_user_group"
+        },
+        {
+          "class_name": "authentication.service",
+          "function": "handleDeleteUserGroup",
+          "filter": "command:delete_user_group"
+        },
+        {
+          "class_name": "authentication.service",
+          "function": "handleGetUserGroups",
+          "filter": "command:get_user_groups"
+        },
+        {
+          "class_name": "authentication.service",
+          "function": "handleSaveUser",
+          "filter": "command:save_user"
+        },
+        {
+          "class_name": "authentication.service",
+          "function": "handleDeleteUser",
+          "filter": "command:delete_user"
+        },
+        {
+          "class_name": "authentication.service",
+          "function": "handleGetUsers",
+          "filter": "command:get_users"
+        }
+      ]
+    }
+  ]
+}

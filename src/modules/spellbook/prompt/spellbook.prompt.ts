@@ -5,7 +5,7 @@ import chalk from "chalk";
 import {
   AbilityResponseHelperInterface,
   ActivateConversation,
-  ChatMessage,
+  AmqpGolemMessage,
   EmbeddingInfo,
   LoadedEmbeddings,
   LoggerServiceInterface,
@@ -53,6 +53,13 @@ export class SpellbookPrompt {
   @PluginSystem
   async deleteConversation(args, info) {
     const conversation = this.modelService.create("ChatConversation");
+    const loadedConversation = await conversation.findByPk(args.id);
+    if (!loadedConversation || loadedConversation.user_id != args.user_id) {
+      this.logger.error(
+        `user id ${args.user_id} trying to delete a conversation for another user`
+      );
+      return { id: 0 };
+    }
     await this.workspaceService.deleteFolder(`workspace/chats/chat-${args.id}`);
     conversation.destroy({ where: { id: args.id } });
     const message = this.modelService.create("ChatConversationMessage");
@@ -64,6 +71,12 @@ export class SpellbookPrompt {
   async updateConversation(args, info) {
     const conversation = this.modelService.create("ChatConversation");
     const loadedConversation = await conversation.findByPk(args.id);
+    if (!loadedConversation || loadedConversation.user_id != args.user_id) {
+      this.logger.error(
+        `user id ${args.user_id} trying to update a conversation for another user`
+      );
+      return { id: 0 };
+    }
     loadedConversation.update({
       topic: args.topic,
       use_model: args.use_model,
@@ -71,6 +84,10 @@ export class SpellbookPrompt {
       top_p: args.top_p,
       top_k: args.top_k,
       seed: args.seed,
+      min_p: args.min_p,
+      mirostat: args.mirostat,
+      mirostat_tau: args.mirostat_tau,
+      mirostat_eta: args.mirostat_eta,
       temperature: args.temperature,
       router_config: args.router_config,
     });
@@ -81,6 +98,13 @@ export class SpellbookPrompt {
   async deleteConversationMessage(args, info) {
     const message = this.modelService.create("ChatConversationMessage");
     const messageToDelete = await message.findOne({ where: { id: args.id } });
+    if (!messageToDelete || messageToDelete.user_id != args.user_id) {
+      this.logger.error(
+        `user id ${args.user_id} trying to delete a conversation message for another user`
+      );
+      return { id: 0 };
+    }
+
     if (messageToDelete) {
       await messageToDelete.deleteFiles();
     }
@@ -111,7 +135,12 @@ export class SpellbookPrompt {
   }
 
   async handleSocketConnection(message: SocketMessage): Promise<boolean> {
-    await this.workspaceService.setWorkspace(message.socket_id, "", "");
+    await this.workspaceService.setWorkspace(
+      message.socket_id,
+      message.user_id,
+      "",
+      ""
+    );
     return true;
   }
 
@@ -122,12 +151,18 @@ export class SpellbookPrompt {
 
   async handleResetWorkspace(message: SocketMessage): Promise<boolean> {
     if (message.payload.conversation_id === 0) {
-      await this.workspaceService.setWorkspace(message.socket_id, "", "");
+      await this.workspaceService.setWorkspace(
+        message.socket_id,
+        message.user_id,
+        "",
+        ""
+      );
       return true;
     }
 
     await this.workspaceService.setCurrentWorkspace(
       message.socket_id,
+      message.user_id,
       `chats/chat-${message.payload.conversation_id}`
     );
     return true;
@@ -540,7 +575,8 @@ export class SpellbookPrompt {
           await this.moeService.findBestChatFunction(
             embedding,
             this.embeddingMap,
-            contentJson
+            contentJson,
+            currentJob.user_permissions
           );
 
         this.logger.info(`function: ${embedding}`, {
@@ -551,7 +587,8 @@ export class SpellbookPrompt {
           await this.moeService.findBestMoeFunction(
             embedding,
             this.embeddingMap,
-            contentJson
+            contentJson,
+            currentJob.user_permissions
           );
 
         //  execute the chat function if it's score beats all skills or it was manually selected
@@ -605,7 +642,8 @@ export class SpellbookPrompt {
           await this.moeService.findBestMoeSkill(
             embedding,
             this.embeddingMap,
-            contentJson
+            contentJson,
+            currentJob.user_permissions
           );
 
         const shortcutSkill =
@@ -781,10 +819,14 @@ export class SpellbookPrompt {
 
     // allow for UI override of defaults
     const modelConfig = message.payload;
-    const temperature = modelConfig.temperature || 0.9;
+    const temperature = modelConfig.temperature || 1;
     const topP = modelConfig.top_p || 0.9;
-    const topK = modelConfig.top_k || 0.9;
+    const topK = modelConfig.top_k || 50;
     const seed = modelConfig.seed || -1;
+    const minP = modelConfig.min_p || 0.05;
+    const mirostat = modelConfig.mirostat || 0;
+    const mirostatEta = modelConfig.mirostat_eta || 0.1;
+    const mirostatTau = modelConfig.mirostat_tau || 5;
     const maxNewTokens = parseInt(skillConfig.max_new_tokens) || 1024;
     if (modelConfig.system_message && modelConfig.system_message.length) {
       stripHtml.unshift({
@@ -800,7 +842,11 @@ export class SpellbookPrompt {
       temperature: temperature,
       top_p: topP,
       top_k: topK,
-      seed: seed,
+      min_p: minP,
+      mirostat: mirostat,
+      mirostat_tau: mirostatTau,
+      mirostat_eta: mirostatEta,
+      seed: parseInt(seed),
       max_new_tokens: maxNewTokens,
     };
 
@@ -814,10 +860,11 @@ export class SpellbookPrompt {
       }
       payload.img_url = await this.workspaceService.getFileUrl(
         message.socket_id,
-        currentJob.img_file
+        currentJob.img_file,
+        2
       );
 
-      // Need to strip all messages older than
+      // Need to strip all messages older than ...
     }
 
     // send message to backend service to get prompt response
@@ -917,7 +964,8 @@ export class SpellbookPrompt {
       currentJob.user_message_id,
       currentJob.conversation_id,
       [],
-      currentJob.icons
+      currentJob.icons,
+      currentJob.user_id
     );
 
     const payload = this.buildSocketResponsePayload(
@@ -1020,11 +1068,11 @@ export class SpellbookPrompt {
   }
 
   @PluginSystem
-  async handleChatProgress(message): Promise<boolean> {
+  async handleProgressUpdate(message: AmqpGolemMessage): Promise<boolean> {
     const messageContent = message.content.toString();
     this.socketService.emit(
       message.properties.headers.socket_id,
-      "chat_progress_bar",
+      "progress_bar_update",
       JSON.parse(messageContent)
     );
     return true;
@@ -1053,6 +1101,39 @@ export class SpellbookPrompt {
     return true;
   }
 
+  @PluginSystem
+  async handleGetOnlineSkills(message: SocketMessage): Promise<void> {
+    const skillMap = {};
+    const online = this.spellbookService.getOnlineSkills();
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+
+    for (let i = 0; i < online.length; i++) {
+      const current = online[i];
+      for (let j = 0; j < current.use.length; j++) {
+        if (
+          !userPermissions.skills.includes(current.routing_key) &&
+          !userPermissions.is_admin
+        )
+          continue;
+        const currentUse = current.use[j];
+        if (!skillMap[currentUse]) {
+          skillMap[currentUse] = [];
+        }
+        skillMap[currentUse].push({
+          label: current.label,
+          value: current.routing_key,
+        });
+      }
+    }
+
+    await this.socketService.emit(message.socket_id, "finish_command", {
+      skills: skillMap,
+      command: "get_online_skills",
+    });
+  }
+
   // gets a list of dropdown options for running models
   @PluginSystem
   async getRunningLanguageModels() {
@@ -1077,12 +1158,25 @@ export class SpellbookPrompt {
   }
 
   @PluginSystem
-  async handleGetRunningLanguageModels(message) {
-    await this.socketService.emit(
-      message.socket_id,
-      "online_language_models",
-      await this.getRunningLanguageModels()
+  async handleGetRunningLanguageModels(message: SocketMessage) {
+    const allModels = await this.getRunningLanguageModels();
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
     );
+
+    const clippedList = [];
+    for (let i = 0; i < allModels.length; i++) {
+      if (
+        userPermissions.skills.includes(allModels[i].value) ||
+        allModels[i].value == "none" ||
+        userPermissions.is_admin
+      )
+        clippedList.push(allModels[i]);
+    }
+    await this.socketService.emit(message.socket_id, "finish_command", {
+      command: "get_online_language_models",
+      models: clippedList,
+    });
   }
 
   @PluginSystem
@@ -1099,7 +1193,8 @@ export class SpellbookPrompt {
     parentId: number,
     conversationId: number,
     files: string[],
-    icons: string[]
+    icons: string[],
+    userId: number
   ): Promise<number> {
     const iconsStr: string = icons.join(",");
     const filesStr: string = files.join(",");
@@ -1114,6 +1209,7 @@ export class SpellbookPrompt {
       num_children: 1,
       conversation_id: conversationId,
       files: filesStr,
+      user_id: userId,
     });
     return newMessage.id;
   }
@@ -1127,7 +1223,12 @@ export class SpellbookPrompt {
     temperature: number,
     topK: number,
     topP: number,
-    routerConfig: string
+    minP: number,
+    mirostat: number,
+    mirostatEta: number,
+    mirostatTau: number,
+    routerConfig: string,
+    userId: number
   ): Promise<number> {
     const conversation = this.modelService.create("ChatConversation");
     const newConversation = await conversation.create({
@@ -1140,7 +1241,12 @@ export class SpellbookPrompt {
       temperature: temperature,
       top_k: topK,
       top_p: topP,
+      min_p: minP,
+      mirostat: mirostat,
+      mirostat_eta: mirostatEta,
+      mirostat_tau: mirostatTau,
       router_config: routerConfig,
+      user_id: userId,
     });
     return newConversation.id;
   }
@@ -1177,9 +1283,14 @@ export class SpellbookPrompt {
       model_route_threshold: 0.92,
     };
 
+    // get user permissions
+    const userPermissions = await this.vaultService.getUserPermissions(
+      message.user_id
+    );
+
     let useModel =
       preferredModelRoute ||
-      this.moeService.selectDefaultLanguageModel(skillConfig);
+      this.moeService.selectDefaultLanguageModel(skillConfig, userPermissions);
 
     let {
       modelManuallySelected,
@@ -1191,10 +1302,11 @@ export class SpellbookPrompt {
       message.payload.shortcuts,
       message,
       skillConfig,
-      availableLanguageModels
+      availableLanguageModels,
+      userPermissions
     );
     useModel = modelManuallySelected ? manuallySelectedModel : useModel;
-    //
+
     // create a new conversation if this is first message
     const conversationId = !message.payload.conversation_id
       ? await this.createConversation(
@@ -1205,13 +1317,19 @@ export class SpellbookPrompt {
           conversationData.temperature,
           conversationData.top_k,
           conversationData.top_p,
-          conversationData.router_config
+          conversationData.min_p,
+          conversationData.mirostat,
+          conversationData.mirostat_eta,
+          conversationData.mirostat_tau,
+          conversationData.router_config,
+          message.user_id
         )
       : message.payload.conversation_id;
 
     // set the work space
     await this.workspaceService.setCurrentWorkspace(
       message.socket_id,
+      message.user_id,
       `chats/chat-${conversationId}`
     );
 
@@ -1236,7 +1354,8 @@ export class SpellbookPrompt {
       message.payload.parent_id,
       conversationId,
       newFiles,
-      ["asset/spellbook/core/user-avatar.png"]
+      ["asset/spellbook/core/user-avatar.png"],
+      message.user_id
     );
 
     // run checks on if this is a visual model or not
@@ -1272,6 +1391,7 @@ export class SpellbookPrompt {
       num_jobs: 0,
       num_complete: 0,
       router_config: routerConfig,
+      user_permissions: userPermissions,
       icons: ["asset/spellbook/core/ai-icon.jpeg"],
       user_shortcuts: userShortcuts,
       shortcuts: aiShortcuts,
@@ -1291,6 +1411,7 @@ export class SpellbookPrompt {
       cursor_index: 0,
       cursor_tail: "",
       guessed_function: null,
+      user_id: message.user_id,
     });
 
     // keep record of incoming socket message
