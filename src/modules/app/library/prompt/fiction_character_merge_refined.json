@@ -1,0 +1,43 @@
+{
+    "temperature": 0.6,
+    "top_k": 50,
+    "top_p": 0.9,
+    "min_p": 0.1,
+    "seed": -1,
+    "mirostat": 0,
+    "mirostat_eta": 0.1,
+    "mirostat_tau": 5,
+    "start_response": "{",
+    "stream": false,
+    "debug": true,
+    "messages": [
+      {
+        "role": "system",
+        "content": "The user message contains two pieces of information. The first is two personality descriptions extracted from a novel. The second contains two physical descriptions of the character extracted from the same novel. Combine each of these Indvidual items into one coherent message for personality and physical appearance. Your output will be a JSON object with personality_description,  physical_description keys."
+      },
+      {
+        "role": "user",
+        "content": "Personality Description #1: The Queen of the Field Mice is a small gray mouse who shows gratitude for help received. She leads her group with grace and poise. Her leadership qualities are evident in how she handles interactions with those outside of her species.\nPersonality Description #2:The Queen of the Mice is a wise and knowledgeable character. She advises Dorothy to use the Golden Cap, showcasing her strategic thinking in helping others achieve their goals. Her squeaky little voice adds an element of cuteness and endearment to her persona.\n\nPhysical Description #1: A tiny but regal field mouse in gray fur.\nPhysical Description #2: The Queen has a small size with a high-pitched, squeaky voice that is indicative of her mouse origins."
+      },
+      {
+        "role": "assistant",
+        "content": "{\n  \"personality_description\": \"The Queen of the Field Mice is a small gray mouse who shows gratitude for help received and leads her group with grace and poise. Her leadership qualities are evident in how she handles interactions with those outside of her species. Moreover, she is a wise and knowledgeable character who advises Dorothy to use the Golden Cap, showcasing her strategic thinking in helping others achieve their goals. Her squeaky little voice adds an element of cuteness and endearment to her persona.\",\n  \"physical_description\": \"The Queen of the Field Mice is a tiny but regal field mouse in gray fur. She has a small size with a high-pitched, squeaky voice that is indicative of her mouse origins.\"\n}"
+      },
+      {
+        "role": "user",
+        "content": "Personality Description #1: The Woodman is a strong and capable fighter who demonstrates bravery in the face of danger. He is grateful for the new heart given to him and looks forward to experiencing emotions like love, joy, sadness and pain. His determination and resourcefulness are evident throughout his journey with Dorothy. He also possesses a sensible and practical nature that guides his actions. Despite being made of tin, he shows caution and alertness to avoid harming those who are smaller than himself, demonstrating his kindness-hearted nature.\nPersonality Description #2: The Tin Woodman is a complex character. He is generous and loyal to his friends but lacks emotional intelligence due to the loss of his heart. Despite this, he shows compassion towards others and seeks to regain his emotions through finding a new heart in Oz. His logic-driven thinking often conflicts with his desire for emotional connections. He is courageous and protective, willing to help those in need even when it means going against his own best interests. His tin body makes him strong but also rigid and unable to feel emotion, though he tries his best to maintain a positive outlook. The Tin Woodman is described as sentimental about the past while being content with his new heart and the changes it brings.\n\nPhysical Description #1: He is described as a Tin man with an axe in hand. His chest has a square hole that was later filled by a heart made entirely of silk and stuffed with sawdust. He is also described as kind-hearted.\nPhysical Description #2: A man made entirely of tin with rusted body and limbs, a sharp axe in hand for cutting down trees, an oil can attached to his body for maintenance. He wears a soldier's uniform that is battered and bent with several patches. His head works on hinges and he shines in the sun due to being made of metal."
+      },
+      {
+        "role": "assistant",
+        "content": "{\n  \"personality_description\": \"The Woodman is a strong, capable fighter who demonstrates bravery in the face of danger. He is grateful for the new heart given to him and looks forward to experiencing emotions like love, joy, sadness and pain. His determination, resourcefulness, sensible and practical nature guides his actions. Despite being made of tin, he shows caution and alertness to avoid harming those smaller than himself, demonstrating his kind-hearted nature. He is a complex character who is generous and loyal to his friends but lacks emotional intelligence due to the loss of his heart. Despite this, he shows compassion towards others and seeks to regain his emotions through finding a new heart in Oz. His logic-driven thinking often conflicts with his desire for emotional connections. He is courageous and protective, willing to help those in need even when it means going against his own best interests. His tin body makes him strong but also rigid and unable to feel emotion, though he tries his best to maintain a positive outlook. The Tin Woodman is sentimental about the past while being content with his new heart and the changes it brings.\",\n  \"physical_description\": \"The Tin Woodman is described as a man made entirely of tin with rusted body and limbs, a sharp axe in hand for cutting down trees, an oil can attached to his body for maintenance. He wears a soldier's uniform that is battered and bent with several patches. His head works on hinges and he shines in the sun due to being made of metal. His chest has a square hole that was later filled by a heart made entirely of silk and stuffed with sawdust. He is also described as kind-hearted.\"\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "Personality Description #1: The King of the Winged Monkeys is a character who has evolved from being mischievous to now being friendly and open. He shares his story with Dorothy willingly, showing that he's changed for the better and become more approachable over time. His willingness to help indicates a kind-hearted nature.\nPersonality Description #2: The Monkey King is a complex character. He is fearful and loyal to the owner of the Golden Cap, but he also shows respect towards Dorothy while remaining firm in his decision not to cross the desert. His loyalty is clear, and yet he maintains an air of independence and strength in making decisions for himself.\n\nPhysical Description #1: \nPhysical Description #2:"
+      },
+      {
+        "role": "assistant",
+        "content": "{\n  \"personality_description\": \"The King of the Winged Monkeys is a character who has evolved from being mischievous to now being friendly and open. He willingly shares his story with Dorothy, showing that he's changed for the better and become more approachable over time. His willingness to help indicates a kind-hearted nature. Moreover, the Monkey King is a complex character. He is fearful and loyal to the owner of the Golden Cap, but he also shows respect towards Dorothy while remaining firm in his decision not to cross the desert. His loyalty is clear, and yet he maintains an air of independence and strength in making decisions for himself.\",\n  \"physical_description\": \"\"\n}"
+      }
+    ]
+  }

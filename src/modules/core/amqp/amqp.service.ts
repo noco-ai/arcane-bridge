@@ -11,6 +11,7 @@ import amqp, {
   ConsumeMessage,
 } from "amqplib/callback_api";
 import { PluginSystem } from "../../../plugin";
+import crypto from "crypto";
 
 interface AmqpCliOptions {
   serverId: string;
@@ -327,6 +328,94 @@ export class AmqpService implements AmqpServiceInterface {
           resolve(ok);
         }
       });
+    });
+  }
+
+  getQueueNameFromRoutingKey(routingKey: string): string {
+    const hash = crypto.createHash("sha256");
+    hash.update(routingKey);
+    const shortHash = hash.digest("hex").substring(0, 10);
+    const queueName = `skill_${shortHash}`;
+    return queueName;
+  }
+
+  @PluginSystem
+  async cancelMessages(
+    routingKey: string,
+    headersToMatch: string[],
+    messageCount: number
+  ): Promise<void> {
+    if (!this.channel) {
+      throw new Error("amqp channel not initialized");
+    }
+
+    const queueName = await this.getQueueNameFromRoutingKey(routingKey);
+    if (!queueName) {
+      throw new Error("Queue not found for given exchange and routing key");
+    }
+
+    const headerMap = new Map<string, string>();
+    headersToMatch.forEach((header) => {
+      const [key, value] = header.split(":");
+      headerMap.set(key, value);
+    });
+
+    let processedCount = 0;
+    let consumerTag = "";
+    let lastProcessedTime = Date.now();
+
+    return new Promise((resolve, reject) => {
+      this.channel.consume(
+        queueName,
+        (message) => {
+          if (!message) return;
+          processedCount++;
+          lastProcessedTime = Date.now();
+          const headers = message.properties.headers;
+          let isMatch = true;
+          headerMap.forEach((value, key) => {
+            if (!headers[key] || headers[key] !== value) {
+              isMatch = false;
+            }
+          });
+
+          if (isMatch) {
+            this.channel.ack(message);
+          } else {
+            this.channel.nack(message, true);
+          }
+
+          if (processedCount >= messageCount) {
+            this.channel.cancel(consumerTag);
+            resolve();
+          }
+        },
+        { noAck: false },
+        (err, ok) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          consumerTag = ok.consumerTag;
+        }
+      );
+
+      const checkInactivity = () => {
+        if (Date.now() - lastProcessedTime > 5000) {
+          this.channel.cancel(consumerTag, (err) => {
+            if (err) {
+              console.error("Error cancelling the consumer:", err);
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        } else {
+          setTimeout(checkInactivity, 1000);
+        }
+      };
+
+      setTimeout(checkInactivity, 5000);
     });
   }
 

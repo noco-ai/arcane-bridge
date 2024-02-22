@@ -33,6 +33,10 @@ const ChatConversationModelFactory = (
         type: DataTypes.STRING,
         allowNull: true,
       },
+      first_message_id: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
       seed: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -84,6 +88,10 @@ const ChatConversationModelFactory = (
       updated_at: {
         type: DataTypes.DATE,
         allowNull: false,
+      },
+      ally_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        defaultValue: 0,
       },
     },
     {

@@ -25,8 +25,8 @@
     {
       "label": "App Manager",
       "spell_label": "Registry of Runes",
-      "group": "spells",
-      "sort_order": 200,
+      "group": "configuration",
+      "sort_order": 400,
       "icon": "pi pi-fw pi-th-large",
       "route": "app-manager",
       "admin_only": true

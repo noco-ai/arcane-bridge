@@ -17,6 +17,21 @@
       "consumer": [
         {
           "class_name": "spellbook.prompt",
+          "function": "handleSwitchMessageChain",
+          "filter": "command:switch_message_chain"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleTtsDataUpload",
+          "filter": "command:process_tts_data"
+        },
+        {
+          "class_name": "spellbook.prompt",
+          "function": "handleAsrDataUpload",
+          "filter": "command:process_asr_data"
+        },
+        {
+          "class_name": "spellbook.prompt",
           "function": "handleGetRunningLanguageModels",
           "filter": "command:get_online_language_models"
         },
@@ -73,6 +88,138 @@
       "factory_file": "model/pinned.embedding.model.factory"
     },
     {
+      "name": "DigitalAlly",
+      "class_file": "model/digital.ally.model",
+      "factory_file": "model/digital.ally.model.factory",
+      "graphql_query": [
+        {
+          "query": "getDigitalAlly",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "DigitalAllyQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteDigitalAlly",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "DigitalAllyDelete",
+          "resolver_file": "digital.ally",
+          "resolver_function": "deleteDigitalAlly"
+        },
+        {
+          "mutation": "updateDigitalAlly",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "user_id",
+              "type": "integer"
+            },
+            {
+              "name": "system_message",
+              "type": "string"
+            },
+            {
+              "name": "use_model",
+              "type": "string"
+            },
+            {
+              "name": "seed",
+              "type": "float"
+            },
+            {
+              "name": "temperature",
+              "type": "float"
+            },
+            {
+              "name": "top_k",
+              "type": "integer"
+            },
+            {
+              "name": "top_p",
+              "type": "float"
+            },
+            {
+              "name": "min_p",
+              "type": "float"
+            },
+            {
+              "name": "mirostat",
+              "type": "integer"
+            },
+            {
+              "name": "mirostat_tau",
+              "type": "float"
+            },
+            {
+              "name": "mirostat_eta",
+              "type": "float"
+            },
+            {
+              "name": "router_config",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "wake_words",
+              "type": "string"
+            },
+            {
+              "name": "chat_round_limits",
+              "type": "integer"
+            },
+            {
+              "name": "voice",
+              "type": "string"
+            },
+            {
+              "name": "location_image",
+              "type": "string"
+            },
+            {
+              "name": "character_image",
+              "type": "string"
+            },
+            {
+              "name": "short_description",
+              "type": "string"
+            },
+            {
+              "name": "tag_line",
+              "type": "string"
+            },
+            {
+              "name": "conversation_tone",
+              "type": "string"
+            },
+            {
+              "name": "sort_order",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "DigitalAllyUpdate",
+          "resolver_file": "digital.ally",
+          "resolver_function": "updateDigitalAlly"
+        }
+      ]
+    },
+    {
       "name": "ChatConversation",
       "class_file": "model/chat.conversation.model",
       "factory_file": "model/chat.conversation.model.factory",
@@ -86,6 +233,17 @@
             }
           ],
           "schema_type": "ChatConversationQuery",
+          "response_type": "list"
+        },
+        {
+          "query": "getConversationByAlly",
+          "args": [
+            {
+              "name": "ally_id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "ChatConversationsByAlly",
           "response_type": "list"
         }
       ],
@@ -215,12 +373,7 @@
           "class_name": "spellbook.prompt",
           "function": "handleProgressUpdate",
           "filter": "command:update_progress"
-        }
-      ]
-    },
-    {
-      "name": "arcane_bridge_{serverid}",
-      "consumer": [
+        },
         {
           "class_name": "spellbook.prompt",
           "function": "processInferActionJob",

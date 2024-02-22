@@ -1,0 +1,33 @@
+{
+  "label": "Digital Allies",
+  "version": "1.0.0",
+  "spell_label": "Digital Allies",
+  "module": "app/digital-ally",
+  "description": "",
+  "dependencies": ["spellbook/core"],
+  "unique_key": "spellbook_digital_ally",
+  "can_remove": true,
+  "icon": "asset/app/digital-ally/digital-ally.jpeg",
+  "skill_dependencies": ["language_model|visual_language_model"],
+  "menu_item": [
+    {
+      "label": "Digital Allies",
+      "spell_label": "Digital Allies",
+      "group": "spells",
+      "sort_order": 101,
+      "icon": "pi pi-fw pi-users",
+      "route": "ai-assistant/allies",
+      "key": "digital_allies",
+      "spell_index": "spellbook/prompt"
+    },
+    {
+      "label": "Digital Allies",
+      "spell_label": "Digital Allies",
+      "parent": "application_settings",
+      "group": "configuration",
+      "sort_order": 1001,
+      "icon": "pi pi-fw pi-users",
+      "route": "settings/spellbook/prompt"
+    }
+  ]
+}

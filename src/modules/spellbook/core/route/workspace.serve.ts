@@ -8,6 +8,7 @@ import {
   ServicesConstructorInterface,
   UserAuthentication,
   VaultServiceInterface,
+  WorkspaceDetails,
   WorkspaceServiceInterface,
 } from "types";
 
@@ -43,8 +44,8 @@ export class WorkspaceFileServe {
         "workspace_upload_file"
       );
     }
-    if (!userId)
-      return res.status(401).json({ message: "invalid token provided" });
+    //if (!userId)
+    //return res.status(401).json({ message: "invalid token provided" });
 
     if (conversationId && parseInt(conversationId) !== 0) {
       await this.workspaceService.setCurrentWorkspace(
@@ -54,7 +55,13 @@ export class WorkspaceFileServe {
         true
       );
     }
-    const saveFolder = this.workspaceService.getWorkspaceFolder(socketId);
+
+    let saveFolder = this.workspaceService.getWorkspaceFolder(socketId);
+    if (req.query.path && req.query.path.length) {
+      const workspace: WorkspaceDetails =
+        this.workspaceService.getWorkspaceDetails(socketId);
+      saveFolder = path.join(workspace.baseWorkspace, req.query.path);
+    }
 
     const storage = multer.diskStorage({
       destination: (req, file, cb) => {
@@ -116,7 +123,7 @@ export class WorkspaceFileServe {
 
     let username = null;
     let userId: number = 0;
-    if (req.cookies.token) {
+    /*if (req.cookies.token) {
       const tokenData = req.cookies.token.split("::");
       username = tokenData[0];
 
@@ -152,7 +159,7 @@ export class WorkspaceFileServe {
         this.tokenCache.set(username, userData);
         this.idMap.set(userData.id, username);
       }
-    }
+    }*/
 
     fs.access(fullPath, fs.constants.F_OK, (err) => {
       if (err) {

@@ -133,6 +133,39 @@
                 "pattern": "^[a-z0-9-]+/[a-z0-9-]+$"
             }
         },
+        "prompt_processor": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "unique_key": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9_]+$"
+                    },
+                    "type": {
+                        "type": "string",
+                        "default": "string",
+                        "pattern": "preprocessor|postprocessor"
+                    },
+                    "target": {
+                        "type": "string",
+                        "default": "string",
+                        "pattern": "user|assistant"
+                    },
+                    "class_file": {
+                        "type": "string",
+                        "pattern": "^[a-z-/.]+$"
+                    },                    
+                    "execute_function": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9]+$"
+                    }
+                }
+            }
+        },
         "chat_ability": {
             "type": "array",
             "items": {

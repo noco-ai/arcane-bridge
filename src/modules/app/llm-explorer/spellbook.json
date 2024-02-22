@@ -14,7 +14,7 @@
       "label": "LLM Explorer",
       "spell_label": "Lexicon Enigma",
       "group": "spells",
-      "sort_order": 100,
+      "sort_order": 200,
       "icon": "pi pi-fw pi-compass",
       "route": "llm-explorer",
       "key": "app_llm_explorer",

@@ -119,6 +119,7 @@ class ImageGeneratorSkill
       ),
       negative_prompt: skillData.negative_prompt || skillConfig.negative_prompt,
       prompt: skillData.prompt,
+      progress: true,
     };
     payload = responseClass.mergeConfig(payload, skillConfig);
 
@@ -134,6 +135,8 @@ class ImageGeneratorSkill
         payload,
         {
           socket_id: socketMessage.socket_id,
+          user_id: socketMessage.user_id,
+          progress_target: "chat_progress",
         }
       );
     });

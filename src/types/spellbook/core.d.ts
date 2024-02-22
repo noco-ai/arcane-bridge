@@ -3,14 +3,17 @@ export interface SkillModel {
   provider: string;
 }
 
+export interface AmqpGolemMessageHeaders {
+  success: boolean;
+  errors: string[];
+  socket_id?: string;
+  model_used?: string;
+  [key: string]: any;
+}
+
 export interface AmqpGolemMessage {
   properties: {
-    headers: {
-      success: boolean;
-      errors: string[];
-      socket_id: string;
-      model_used?: string;
-    };
+    headers: AmqpGolemMessageHeaders;
   };
   content: string;
 }
@@ -101,6 +104,21 @@ export interface ChatMessage {
   role: string;
 }
 
+export interface PromptProcessor {
+  label: string;
+  class_file: string;
+  execute_function: string;
+  type: string;
+  target: string;
+  unique_key: string;
+  class_instance?: Object;
+}
+
+export interface PromptProcessors {
+  preprocessor: PromptProcessor[];
+  postprocessor: PromptProcessor[];
+}
+
 export interface MenuItem {
   label: string;
   spell_label: string;
@@ -152,14 +170,21 @@ export interface SpellbookServiceInterface {
   getChatAbilityByKey(uniqueKey: string): ChatAbilityConfig;
   getChatAbilities(): ChatAbilityConfig[];
   setPrompts(prompts: Map<string, Map<string, string>>): boolean;
-  getPrompt(module: string, promptKey: string): string | null | ChatMessage[];
+  getPrompt(module: string, promptKey: string): string | null | any;
   getPrompts(module: string): Map<string, ChatMessage[] | string> | null;
+  getReasoningAgent(modelType?: string): Promise<string>;
   publishCommand(
     exchange: string,
     routingKey: string,
     command: string,
     payload: any,
     customerHeaders?: any
+  ): Promise<boolean>;
+  sendToastMessage(
+    socketId: string,
+    summary: string,
+    detail: string,
+    severity: string
   ): Promise<boolean>;
   handleGetConfiguration(message: SocketMessage): Promise<boolean>;
   handleRunSkill(message: SocketMessage): Promise<boolean>;
@@ -178,11 +203,19 @@ export interface SpellbookServiceInterface {
   getSkillFromKey(skillKey: string): SkillConfig;
   getOnlineSkillFromKey(skillKey: string): OnlineSkill;
   getOnlineSkillFromType(skillType: string): string[];
+  setPromptProcessors(promptProcessors: PromptProcessors): void;
+  getPromptProcessors(): PromptProcessors;
   start(): Promise<boolean>;
   afterConfig();
 }
 
-interface WorkspaceServiceInterface {
+export interface WorkspaceDetails {
+  baseWorkspace: string;
+  currentWorkspace: string;
+}
+
+export interface WorkspaceServiceInterface {
+  copyFileDirect(source: string, destination: string): Promise<void>;
   moveFilesToCurrentWorkspace(
     socketId: string,
     files: string[]
@@ -204,7 +237,7 @@ interface WorkspaceServiceInterface {
     prefix: string,
     fileType: string
   ): Promise<string>;
-  cleanupWorkspace(socketId: string): void;
+  cleanupWorkspace(socketId: string, userId: number): void;
   getList(socketId: string, fileType?: string): Promise<string[] | null>;
   getNewestImage(socketId: string): Promise<string | null>;
   saveFile(
@@ -213,15 +246,31 @@ interface WorkspaceServiceInterface {
     content: string | Buffer,
     currentWorkspace?: boolean
   ): Promise<string>;
+  saveFileByUserId(
+    userId: number,
+    fileName: string,
+    content: string | Buffer,
+    currentWorkspace?: boolean
+  ): Promise<string>;
   createFolder(socketId: string, folderPath: string);
+  createFolderByUserId(userId: number, folderPath: string);
   deleteFile(socketId: string, fileName: string): Promise<void>;
+  deleteFileDirect(fileName: string): Promise<void>;
   getFileUrl(
     socketId: string,
     filePath: string,
     accessCount?: number
   ): Promise<string | null>;
+
+  getUserFileUrl(
+    userId: number,
+    filePath: string,
+    accessCount?: number
+  ): Promise<string>;
+
   checkInWorkspaces(socketId: string, filePath: string): Promise<string | null>;
   getWorkspaceFolder(socketId: string): string;
+  getWorkspaceDetails(socketId: string): WorkspaceDetails;
   deleteFolder(folderPath: string): Promise<void>;
   checkTempAccessKey(key: string): number;
 }

@@ -57,6 +57,15 @@
       }
     ]
   },
+  "prompt_processor": [
+    {
+      "label": "Function Calling",
+      "type": "postprocessor",
+      "class_file": "processors/function.calling",
+      "execute_function": "processFunctionCalling",
+      "target": "user"
+    }
+  ],
   "menu_item": [
     {
       "label": "AI Assistant",
@@ -75,6 +84,25 @@
       "group": "configuration",
       "sort_order": 1000,
       "icon": "pi pi-fw pi-share-alt",
+      "route": "settings/spellbook/prompt"
+    },
+    {
+      "label": "Digital Allies",
+      "spell_label": "Digital Allies",
+      "group": "spells",
+      "sort_order": 101,
+      "icon": "pi pi-fw pi-users",
+      "route": "ai-assistant/allies",
+      "key": "digital_allies",
+      "spell_index": "spellbook/prompt"
+    },
+    {
+      "label": "Digital Allies",
+      "spell_label": "Digital Allies",
+      "parent": "application_settings",
+      "group": "configuration",
+      "sort_order": 1001,
+      "icon": "pi pi-fw pi-users",
       "route": "settings/spellbook/prompt"
     }
   ]

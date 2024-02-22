@@ -5,6 +5,11 @@ chat abilities are implemented allowing for easy access and integration with bot
 
 ![UI demo](https://github.com/noco-ai/spellbook-docker/blob/master/ui-demo.gif)
 
+## Stack Documentation
+
+- https://github.com/noco-ai/spellbook-docker/wiki
+- The wiki for the docker project contains comprehensive documentation for the UI that uses Elemental Golem to serve AI models.
+
 ## Stack Architecture
 
 ![Software stack diagram](https://github.com/noco-ai/spellbook-docker/blob/master/stack.png)

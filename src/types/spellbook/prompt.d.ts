@@ -32,6 +32,8 @@ export interface ActivateConversation {
   cursor_tail: string;
   guessed_function: null | any;
   user_id: number;
+  start_response: string;
+  generated_files: string[];
 }
 
 export interface EmbeddingInfo {
@@ -84,6 +86,7 @@ export interface AbilityResponseHelperInterface {
   sendResponse(
     response: string,
     textOnlyResponse: string | null,
-    socketId: string
+    socketId: string,
+    files?: string[]
   ): Promise<boolean>;
 }

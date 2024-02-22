@@ -69,6 +69,7 @@ export class ImageGeneratorApp {
 
   async handleImage(message: AmqpGolemMessage) {
     const headers = message.properties.headers;
+    console.log(headers);
     const socketId = headers.socket_id;
     if (!headers.success || !this.runningJobs.has(socketId)) {
       this.logger.error(headers.errors.join(","));
@@ -173,6 +174,8 @@ export class ImageGeneratorApp {
           {
             socket_id: socketMessage.socket_id,
             model_used: useModels[i],
+            progress_target: "app_image_generator",
+            user_id: socketMessage.user_id,
           }
         );
       }

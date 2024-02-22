@@ -17,6 +17,7 @@ export interface SocketsServiceInterface {
   start(): void;
   getOpenSockets(): string[];
   emit(socketId: string, event: string, message: any): void;
+  emitToUser(userId: number, event: string, message: any): void;
   setConsumers(consumers: Map<string, Array<SocketConsumerInterface>>): void;
   afterConfig(): Promise<void>;
 }

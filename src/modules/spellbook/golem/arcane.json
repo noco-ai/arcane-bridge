@@ -1,0 +1,59 @@
+{
+  "name": "spellbook/golem",
+  "description": "Wrapper classes for accessing Elemental Golem skills",
+  "dependencies": ["spellbook/core"],
+  "service": [
+    {
+      "class_name": "GolemLlmService",
+      "class_file": "golem.llm.service",
+      "description": ""
+    },
+    {
+      "class_name": "GolemEmbeddingService",
+      "class_file": "golem.embedding.service",
+      "description": ""
+    },
+    {
+      "class_name": "GolemSoundService",
+      "class_file": "golem.sound.service",
+      "description": ""
+    },
+    {
+      "class_name": "GolemImageService",
+      "class_file": "golem.image.service",
+      "description": ""
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "golem.image.service",
+          "function": "handleImageResponse",
+          "filter": "command:core_image_service"
+        },
+        {
+          "class_name": "golem.llm.service",
+          "function": "handleGenerateResponse",
+          "filter": "command:core_llm_service"
+        },
+        {
+          "class_name": "golem.embedding.service",
+          "function": "handleEmbeddingResponse",
+          "filter": "command:core_embedding_service"
+        },
+        {
+          "class_name": "golem.sound.service",
+          "function": "handleWavResponse",
+          "filter": "command:core_sound_service"
+        },
+        {
+          "class_name": "golem.sound.service",
+          "function": "handleAsrResponse",
+          "filter": "command:core_sound_service_asr"
+        }
+      ]
+    }
+  ]
+}
