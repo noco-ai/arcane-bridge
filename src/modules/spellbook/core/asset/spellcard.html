@@ -24,5 +24,95 @@
     >Getting started with Chat Abilities</a
   >
   for instructions on installing and running the models needed for chat
-  abilities to function.
+  abilities to function. <b>Step #1: Download Models</b><br />
+  Models can be downloaded via the UI on each backend server that is running.
+  Start by navigating to Servers > golem-xxxxxx > Available Skills > Embedding.
+  You will need to download both T5 Large v2 and Llama 7B (ExLlama) for routing
+  to work; they are highlighted by the UI to make them easier to find. T5 is
+  found under embeddings, and Llama 7B is found under Language Models. Download
+  any other models you are interested in using; if you do not see the model you
+  want to use, it can be added with the Custom Skill button.
+  <img
+    width="100%"
+    class="mb-4"
+    src="{{base_url}}asset/spellbook/prompt/install-1.png"
+  /><br />
+  <b>Step #2: Run Models</b><br />
+  Once the models have finished downloading, they will appear in the Servers >
+  golem-xxxxxx > Installed Skills area. They can be run by clicking on the icon
+  on the far right that looks like a computer screen.
+  <img width="100%" src="{{base_url}}asset/spellbook/prompt/install-2.png" />
+</p>
+<h5>Shortcuts</h5>
+<p>
+  Shortcuts allow you to access chat abilities and language models when
+  automatic routing is not sending the request to the correct model or chat
+  ability. Shortcuts are emojis that are prepended to a chat request. There are
+  also several pre-defined shortcuts to control the context that is sent to the
+  model. If function and skill pinning are turned on, manual selection also
+  extends the routing definitions, so similar requests will be routed to the
+  chat ability or language model automatically. Below are some examples of how
+  to use shortcuts.
+</p>
+<h6>Chat Ability Shortcuts</h6>
+<p>
+  Each chat ability can be accessed with the shortcut emoji that appears at the
+  beginning of its definition. This emoji also appears below the selected skill
+  icon in the chat session.
+  <br /><br />
+  <b>Example:</b> 🌞 What is the current temp in Chicago?<br />
+  <img width="50%" src="{{base_url}}asset/spellbook/prompt/install-5.png" />
+</p>
+<h6>Skill Shortcuts</h6>
+<p>
+  You can also access language models with a shortcut. The emoji that represents
+  which language model a request can be sent to is found at the beginning of its
+  name in the Online Skills section of the
+  <a href="/#/servers">Servers</a> configuration. This emoji is also output in
+  the chat session in the left-hand column under the circular icon. <br /><br />
+  <b>Example:</b> ⚡ How do I open port 9000 on a Linux box?<br />
+  <img width="50%" src="{{base_url}}asset/spellbook/prompt/install-4.png" />
+</p>
+<h6>Context Limit Shortcuts</h6>
+<p>
+  You can also control the number of past messages that are sent to the language
+  model by using the 👉 and 👆 emojis. This is useful if only a small part of
+  the conversation is relevant to the next chat round and you are trying to save
+  money on API calls to OpenAI. In the two examples below, the first will send
+  only the one message to GPT-4. The second example sends the last 5
+  user/assistant responses to GPT-3.5.<br /><br />
+  <b>Example:</b> 👉✨ What is wrong with this code block? ...<br />
+  <b>Example:</b> 👆5️⃣⚡ Summarize our conversation so far.
+</p>
+<h6>Chat Ability and Skill Pinning</h6>
+<p class="mb-6">
+  The Chat Ability and Skill pinning is functionality that allows the user to
+  extend the definitions for routing. When pinning is enabled and a manual route
+  is selected with an emoji, the function calling system will save the
+  definition of the guessed function or knowledge domain to the database. Future
+  similar chat requests will automatically be routed based on these extended
+  definitions, making the function calling features work better with more use
+  and manually selecting routes.<br />
+  <img
+    width="40%"
+    style="margin: auto"
+    src="{{base_url}}asset/spellbook/prompt/install-3.png"
+  />
+</p>
+<h5>Custom Skills/Models</h5>
+<p>
+  You can define your own models to be used by the various chat abilities on the
+  <a href="/#/servers">Servers</a> page. Click on the Add Skill button. The most
+  important fields are explained below. For the most part, you can copy and
+  paste an existing definition and change a few key fields.<br />
+  <img
+    width="50%"
+    src="{{base_url}}asset/spellbook/prompt/install-6.png"
+  /><br />
+  <b>Label</b> Must be unique.<br />
+  <b>Routing Key</b> Must be unique.<br />
+  <b>Moe Domain</b> Definitions for model routing.<br />
+  <b>Moe Function</b> Definitions for model routing.<br />
+  <b>Model > Name</b> The last part of the HuggingFace URL for the model
+  repository.<br />
 </p>

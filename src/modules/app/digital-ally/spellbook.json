@@ -8,7 +8,9 @@
   "unique_key": "spellbook_digital_ally",
   "can_remove": true,
   "icon": "asset/app/digital-ally/digital-ally.jpeg",
-  "skill_dependencies": ["language_model|visual_language_model"],
+  "skill_dependencies": [
+    "language_model|visual_language_model|reasoning_agent"
+  ],
   "menu_item": [
     {
       "label": "Digital Allies",
