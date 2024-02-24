@@ -7,7 +7,9 @@
   "dependencies": ["spellbook/core"],
   "unique_key": "spellbook_prompt",
   "can_remove": false,
-  "skill_dependencies": ["language_model|visual_language_model"],
+  "skill_dependencies": [
+    "language_model|visual_language_model|reasoning_agent"
+  ],
   "configuration": {
     "vault_path": "spells/ai-assistant",
     "options": [

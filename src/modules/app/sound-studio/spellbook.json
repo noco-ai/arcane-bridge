@@ -7,6 +7,9 @@
   "dependencies": ["spellbook/core"],
   "icon": "asset/app/sound-studio/sound-studio.jpeg",
   "unique_key": "app_sound_studio",
+  "skill_dependencies": [
+    "text_to_speech|automatic_speech_recognition|music_generation"
+  ],
   "can_remove": true,
   "menu_item": [
     {
