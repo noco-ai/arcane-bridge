@@ -9,7 +9,7 @@ import {
   SpellbookServiceInterface,
   UserPermissions,
 } from "types";
-const DDG = require('duck-duck-scrape');
+const DDG = require("duck-duck-scrape");
 
 export class FunctionCallingProcessor {
   private services: ServicesConstructorInterface;
@@ -30,7 +30,7 @@ export class FunctionCallingProcessor {
 
   async processFunctionCalling() {
     try {
-      const result = await this.embeddingService.generateEmbedding(
+      /*const result = await this.embeddingService.generateEmbedding(
         ["TEST ONE TWO"],
         "e5_large_v2"
       );
@@ -41,7 +41,7 @@ export class FunctionCallingProcessor {
         safeSearch: DDG.SafeSearchType.STRICT
       });
 
-      console.log(searchResults);
+      console.log(searchResults);*/
       /*const result = await this.llmService.generate(
         [{ role: "user", content: "Hello!" }],
         "llama2_7b_exllama",
