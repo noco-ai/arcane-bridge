@@ -1,7 +1,7 @@
 {
   "label": "Sound Studio",
   "version": "1.0.0",
-  "spell_label": "Sound Studio",
+  "spell_label": "Potion of Pitches",
   "module": "app/sound-studio",
   "description": "Provides storage and analysis of books.",
   "dependencies": ["spellbook/core"],
@@ -14,7 +14,7 @@
   "menu_item": [
     {
       "label": "Sound Studio",
-      "spell_label": "Sound Studio",
+      "spell_label": "Potion of Pitches",
       "group": "spells",
       "sort_order": 400,
       "icon": "pi pi-fw pi-microphone",

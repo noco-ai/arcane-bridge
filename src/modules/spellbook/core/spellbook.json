@@ -49,7 +49,7 @@
       "route": "configuration/theme"
     },
     {
-      "label": "Skills Configuration",
+      "label": "Models Configuration",
       "spell_label": "Golem Horde",
       "group": "configuration",
       "sort_order": 50,

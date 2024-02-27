@@ -1,7 +1,7 @@
 {
   "label": "Digital Allies",
   "version": "1.0.0",
-  "spell_label": "Digital Allies",
+  "spell_label": "Wizards Familiars",
   "module": "app/digital-ally",
   "description": "",
   "dependencies": ["spellbook/core"],
@@ -14,22 +14,13 @@
   "menu_item": [
     {
       "label": "Digital Allies",
-      "spell_label": "Digital Allies",
+      "spell_label": "Wizards Familiars",
       "group": "spells",
       "sort_order": 101,
       "icon": "pi pi-fw pi-users",
       "route": "ai-assistant/allies",
       "key": "digital_allies",
       "spell_index": "spellbook/prompt"
-    },
-    {
-      "label": "Digital Allies",
-      "spell_label": "Digital Allies",
-      "parent": "application_settings",
-      "group": "configuration",
-      "sort_order": 1001,
-      "icon": "pi pi-fw pi-users",
-      "route": "settings/spellbook/prompt"
     }
   ]
 }
