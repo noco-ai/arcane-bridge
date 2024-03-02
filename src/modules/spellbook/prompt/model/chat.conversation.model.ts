@@ -8,6 +8,7 @@ interface ChatConversationAttributes {
   use_model?: string;
   topic?: string;
   system_message?: string;
+  first_message_id?: number;
   seed?: number;
   temperature?: number;
   top_k?: number;
@@ -20,6 +21,7 @@ interface ChatConversationAttributes {
   router_config?: string;
   created_at: Date;
   updated_at: Date;
+  ally_id: number;
 }
 
 class ChatConversation
@@ -33,6 +35,7 @@ class ChatConversation
   public use_model!: string;
   public topic!: string;
   public system_message!: string;
+  public first_message_id!: number;
   public seed!: number;
   public temperature!: number;
   public top_k!: number;
@@ -45,6 +48,7 @@ class ChatConversation
   public router_config!: string;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
+  public ally_id: number;
 }
 
 export { ChatConversation, ChatConversationAttributes };

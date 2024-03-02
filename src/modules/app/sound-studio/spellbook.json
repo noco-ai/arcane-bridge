@@ -1,0 +1,26 @@
+{
+  "label": "Sound Studio",
+  "version": "1.0.0",
+  "spell_label": "Potion of Pitches",
+  "module": "app/sound-studio",
+  "description": "Provides storage and analysis of books.",
+  "dependencies": ["spellbook/core"],
+  "icon": "asset/app/sound-studio/sound-studio.jpeg",
+  "unique_key": "app_sound_studio",
+  "skill_dependencies": [
+    "text_to_speech|automatic_speech_recognition|music_generation"
+  ],
+  "can_remove": true,
+  "menu_item": [
+    {
+      "label": "Sound Studio",
+      "spell_label": "Potion of Pitches",
+      "group": "spells",
+      "sort_order": 400,
+      "icon": "pi pi-fw pi-microphone",
+      "route": "sound-studio",
+      "key": "app_sound_studio",
+      "spell_index": "app/sound-studio"
+    }
+  ]
+}

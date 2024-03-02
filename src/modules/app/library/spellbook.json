@@ -1,0 +1,24 @@
+{
+  "label": "Book Library",
+  "version": "1.0.0",
+  "spell_label": "Quill of Quests",
+  "module": "app/library",
+  "description": "Provides storage and analysis of books.",
+  "dependencies": ["spellbook/core"],
+  "icon": "asset/app/library/library.jpeg",
+  "unique_key": "app_library",
+  "can_remove": true,
+  "skill_dependencies": ["reasoning_agent", "text_embedding"],
+  "menu_item": [
+    {
+      "label": "Book Library",
+      "spell_label": "Quill of Quests",
+      "group": "spells",
+      "sort_order": 500,
+      "icon": "pi pi-fw pi-book",
+      "route": "library",
+      "key": "app_library",
+      "spell_index": "app/library"
+    }
+  ]
+}

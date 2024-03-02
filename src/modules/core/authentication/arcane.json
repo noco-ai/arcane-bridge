@@ -16,12 +16,6 @@
       "route_file": "route/auth.token",
       "route_function": "getToken",
       "request_type": "post"
-    },
-    {
-      "route": "/api/v1/token",
-      "route_file": "route/auth.token",
-      "route_function": "getToken",
-      "request_type": "post"
     }
   ],
   "socket_event": [

@@ -5,6 +5,8 @@ import {
   ClassFactoryServiceInterface,
   MenuItem,
   ProcessorInterface,
+  PromptProcessor,
+  PromptProcessors,
   SequelizeServiceInterface,
   ServicesConstructorInterface,
   SpellbookConfig,
@@ -103,6 +105,10 @@ class SpellbookConfigProcessor implements ProcessorInterface {
       Map<string, string | ChatMessage[]>
     >();
     let chatAbilities = [];
+    let promptProcessors: PromptProcessors = {
+      preprocessor: [],
+      postprocessor: [],
+    };
     let spellData: SpellbookConfig[] = [];
     const classFactory: ClassFactoryServiceInterface =
       services["ClassFactoryService"];
@@ -211,6 +217,18 @@ class SpellbookConfigProcessor implements ProcessorInterface {
         }
       }
 
+      // create the class instance for the chat abilities
+      if (currentModule.prompt_processor) {
+        const processors: PromptProcessor[] = currentModule.prompt_processor;
+        for (let i = 0; i < processors.length; i++) {
+          processors[i].class_instance = classFactory.create(
+            currentModule.module,
+            processors[i].class_file
+          );
+          promptProcessors[processors[i].type].push(processors[i]);
+        }
+      }
+
       if (!currentModule.menu_group) {
         continue;
       }
@@ -296,6 +314,7 @@ class SpellbookConfigProcessor implements ProcessorInterface {
     spellbookService.setPrompts(modulePrompts);
     spellbookService.setChatAbilities(chatAbilities);
     spellbookService.setSpellDetails(spellData);
+    spellbookService.setPromptProcessors(promptProcessors);
   }
 }
 

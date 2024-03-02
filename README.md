@@ -5,6 +5,12 @@ chat abilities are implemented allowing for easy access and integration with bot
 
 ![UI demo](https://github.com/noco-ai/spellbook-docker/blob/master/ui-demo.gif)
 
+## Stack Documentation
+
+https://github.com/noco-ai/spellbook-docker/wiki
+
+- The wiki for the docker project contains comprehensive documentation for the UI that uses Elemental Golem to serve AI models.
+
 ## Stack Architecture
 
 ![Software stack diagram](https://github.com/noco-ai/spellbook-docker/blob/master/stack.png)
@@ -14,7 +20,7 @@ chat abilities are implemented allowing for easy access and integration with bot
 - Hashicorp Vault >= 1.1
 - RabbitMQ >= 3.6.10
 - MariaDB >= 8.1
-- Elemental Golem >= 0.1.0
+- Elemental Golem >= 0.3.0
 
 ### Required Vault Keys
 
@@ -150,6 +156,13 @@ The following SQL commands need to run when upgrading from v0.1.0.
 - ALTER TABLE chat_conversation ADD COLUMN min_p FLOAT DEFAULT 0.05;
 - ALTER TABLE chat_conversation MODIFY COLUMN top_k int(10) unsigned DEFAULT 50;
 - ALTER TABLE chat_conversation MODIFY COLUMN seed bigint(20) DEFAULT -1;
+
+## Upgrade from v0.2.0
+
+The following SQL commands need to run when upgrading from v0.2.0.
+
+- ALTER TABLE chat_conversation ADD COLUMN ally_id int(10) unsigned DEFAULT 0;
+- ALTER TABLE chat_conversation ADD COLUMN first_message_id int(10) unsigned DEFAULT 0;
 
 ## Chat Abilities
 

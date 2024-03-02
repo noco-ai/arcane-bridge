@@ -81,4 +81,10 @@ export interface AmqpServiceInterface extends ServiceInterface {
     handlerClass: Function,
     handlerFunction: string
   ): Promise<void>;
+
+  cancelMessages(
+    routingKey: string,
+    headersToMatch: string[],
+    messageCount: number
+  ): Promise<void>;
 }

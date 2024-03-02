@@ -18,6 +18,8 @@ export class SocketsService implements SocketsServiceInterface {
   private io: SocketIOServer;
   private openSessions: Map<string, SocketOpenSession>;
   private consumers: Map<string, Array<SocketConsumerInterface>>;
+  private userToSocketId: Map<number, string>;
+  private socketIdToUser: Map<string, number>;
 
   constructor(
     cliParams: EmptyCliOptions,
@@ -37,6 +39,12 @@ export class SocketsService implements SocketsServiceInterface {
       });
       this.openSessions.delete(socket.id);
       this.vault.cleanAuthCache(socket.id);
+    }
+
+    if (this.socketIdToUser.has(socket.id)) {
+      const userId = this.socketIdToUser.get(socket.id);
+      this.socketIdToUser.delete(socket.id);
+      this.userToSocketId.delete(userId);
     }
 
     this.logger.info(`socket disconnected ${socket.id}`, {
@@ -116,9 +124,11 @@ export class SocketsService implements SocketsServiceInterface {
         return;
       }
       this.logger.info(`socket connected ${socket.id}`, { icon: "🔌" });
+      this.userToSocketId.set(userId, socket.id);
+      this.socketIdToUser.set(socket.id, userId);
 
       // select chat queue to use
-      if (typeof this.openSessions[socket.id] === "undefined") {
+      if (!this.openSessions.has(socket.id)) {
         this.logger.info(`new session for socket ${socket.id}`, {
           icon: "🔌",
         });
@@ -166,6 +176,8 @@ export class SocketsService implements SocketsServiceInterface {
   @PluginSystem
   async start(): Promise<boolean> {
     this.openSessions = new Map();
+    this.userToSocketId = new Map();
+    this.socketIdToUser = new Map();
 
     // configure the socket.io server
     this.io = new SocketIOServer(this.express.getServer(), {
@@ -184,6 +196,24 @@ export class SocketsService implements SocketsServiceInterface {
 
   @PluginSystem
   emit(socketId: string, event: string, message: any) {
+    const session: SocketOpenSession = this.openSessions.get(socketId);
+    if (session) {
+      session.socket.emit(event, message);
+    } else {
+      this.logger.warn(
+        `unable to send message. no open session found for socket id: ${socketId}`
+      );
+    }
+  }
+
+  @PluginSystem
+  emitToUser(userId: number, event: string, message: any) {
+    if (!this.userToSocketId.has(userId)) {
+      this.logger.warn(
+        `unable to send message. no open session found for user id: ${userId}`
+      );
+    }
+    const socketId = this.userToSocketId.get(userId);
     const session: SocketOpenSession = this.openSessions.get(socketId);
     if (session) {
       session.socket.emit(event, message);

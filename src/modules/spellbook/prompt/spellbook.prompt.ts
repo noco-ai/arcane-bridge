@@ -7,6 +7,7 @@ import {
   ActivateConversation,
   AmqpGolemMessage,
   EmbeddingInfo,
+  GolemSoundServiceInterface,
   LoadedEmbeddings,
   LoggerServiceInterface,
   SequelizeServiceInterface,
@@ -33,6 +34,7 @@ export class SpellbookPrompt {
   private moeService: MoeHelper;
   private embeddingInfo: EmbeddingInfo;
   private embeddingMap: LoadedEmbeddings;
+  private golemSoundService: GolemSoundServiceInterface;
 
   constructor(services: ServicesConstructorInterface) {
     this.services = services;
@@ -42,6 +44,7 @@ export class SpellbookPrompt {
     this.spellbookService = services["SpellbookService"];
     this.workspaceService = services["WorkspaceService"];
     this.vaultService = services["VaultService"];
+    this.golemSoundService = services["GolemSoundService"];
     this.moeService = new MoeHelper(services);
     this.abilityHelper = new AbilityResponseHelper(services, this);
     this.embeddingInfo = null;
@@ -105,16 +108,32 @@ export class SpellbookPrompt {
       return { id: 0 };
     }
 
-    if (messageToDelete) {
-      await messageToDelete.deleteFiles();
+    // if last message has sibling messages
+    const siblings = await message.findAll({
+      where: { parent_id: messageToDelete.parent_id },
+    });
+    if (siblings?.length > 1) {
+      let newChildId = 0;
+      for (let i = 0; i < siblings.length; i++) {
+        if (siblings[i].id != args.id) {
+          newChildId = siblings[i].id;
+          break;
+        }
+      }
+      const parent = await message.findOne({
+        where: { id: messageToDelete.parent_id },
+      });
+      parent.update({
+        active_child_id: newChildId,
+        num_children: parent.num_children - 1,
+      });
     }
 
+    if (messageToDelete) await messageToDelete.deleteFiles();
     const childMessages = await message.findAll({
       where: { parent_id: args.id },
     });
-    for (const childMessage of childMessages) {
-      await childMessage.deleteFiles();
-    }
+    for (const childMessage of childMessages) await childMessage.deleteFiles();
 
     message.destroy({ where: { id: args.id } });
     message.destroy({ where: { parent_id: args.id } });
@@ -145,7 +164,10 @@ export class SpellbookPrompt {
   }
 
   async handleSocketDisconnect(message: SocketMessage): Promise<boolean> {
-    await this.workspaceService.cleanupWorkspace(message.socket_id);
+    await this.workspaceService.cleanupWorkspace(
+      message.socket_id,
+      message.user_id
+    );
     return true;
   }
 
@@ -843,6 +865,7 @@ export class SpellbookPrompt {
       top_p: topP,
       top_k: topK,
       min_p: minP,
+      start_response: currentJob.start_response,
       mirostat: mirostat,
       mirostat_tau: mirostatTau,
       mirostat_eta: mirostatEta,
@@ -890,7 +913,8 @@ export class SpellbookPrompt {
     icons: string[],
     shortcuts: string,
     content: string,
-    files: string[]
+    files: string[],
+    generatedFiles: string[]
   ) {
     // build the response to send to the user
     const payload = {
@@ -903,6 +927,7 @@ export class SpellbookPrompt {
       content: content,
       raw: content,
       files: files,
+      generated_files: generatedFiles,
       blocks: [],
       created_at: new Date().getTime(),
     };
@@ -963,10 +988,11 @@ export class SpellbookPrompt {
       currentJob.shortcuts,
       currentJob.user_message_id,
       currentJob.conversation_id,
-      [],
+      currentJob.generated_files,
       currentJob.icons,
       currentJob.user_id
     );
+    await this.setMessageActiveChild(currentJob.user_message_id, newMessageId);
 
     const payload = this.buildSocketResponsePayload(
       newMessageId,
@@ -975,7 +1001,8 @@ export class SpellbookPrompt {
       currentJob.icons,
       currentJob.shortcuts,
       content,
-      currentJob.user_files
+      currentJob.user_files,
+      currentJob.generated_files
     );
 
     await this.socketService.emit(
@@ -984,11 +1011,35 @@ export class SpellbookPrompt {
       payload
     );
 
+    // run post processing jobs
+    await this.applyPromptProcessors("postprocessor");
+
     // cleanup job data
     this.streamResponseBuffer.delete(headers.socket_id);
     this.activeConversations.delete(headers.socket_id);
     this.incomingSocketMessages.delete(headers.socket_id);
     return true;
+  }
+
+  private async applyPromptProcessors(type: string) {
+    const processors = this.spellbookService.getPromptProcessors();
+    if (processors[type].length) {
+      const postProcessors = processors[type];
+      for (let i = 0; i < postProcessors.length; i++) {
+        const currentProcessor = postProcessors[i];
+
+        if (
+          !currentProcessor.class_instance[currentProcessor.execute_function]
+        ) {
+          this.logger.error(
+            `class file ${currentProcessor.class_file} has no function ${currentProcessor.execute_function}`
+          );
+        }
+        await currentProcessor.class_instance[
+          currentProcessor.execute_function
+        ]();
+      }
+    }
   }
 
   @PluginSystem
@@ -1069,11 +1120,15 @@ export class SpellbookPrompt {
 
   @PluginSystem
   async handleProgressUpdate(message: AmqpGolemMessage): Promise<boolean> {
+    const target =
+      message.properties?.headers?.progress_target || "chat_progress";
     const messageContent = message.content.toString();
-    this.socketService.emit(
-      message.properties.headers.socket_id,
+    const json = JSON.parse(messageContent);
+    json.target = target;
+    this.socketService.emitToUser(
+      message.properties.headers.user_id,
       "progress_bar_update",
-      JSON.parse(messageContent)
+      json
     );
     return true;
   }
@@ -1186,6 +1241,37 @@ export class SpellbookPrompt {
   }
 
   @PluginSystem
+  async setMessageActiveChild(
+    messageId: number,
+    activeChildId: number
+  ): Promise<number> {
+    const messageModel = this.modelService.create("ChatConversationMessage");
+    const updMessage = await messageModel.findByPk(messageId);
+    if (updMessage)
+      await updMessage.update({
+        active_child_id: activeChildId,
+        num_children: updMessage.num_children + 1,
+      });
+
+    return messageId;
+  }
+
+  @PluginSystem
+  async setConversationActiveChild(
+    conversationId: number,
+    activeChildId: number
+  ): Promise<number> {
+    const messageModel = this.modelService.create("ChatConversation");
+    const updMessage = await messageModel.findByPk(conversationId);
+    if (updMessage)
+      await updMessage.update({
+        first_message_id: activeChildId,
+      });
+
+    return conversationId;
+  }
+
+  @PluginSystem
   async createConversationMessage(
     content: string,
     role: string,
@@ -1206,7 +1292,7 @@ export class SpellbookPrompt {
       shortcuts: shortcuts,
       parent_id: parentId,
       active_child_id: 0,
-      num_children: 1,
+      num_children: 0,
       conversation_id: conversationId,
       files: filesStr,
       user_id: userId,
@@ -1228,7 +1314,8 @@ export class SpellbookPrompt {
     mirostatEta: number,
     mirostatTau: number,
     routerConfig: string,
-    userId: number
+    userId: number,
+    allyId: number
   ): Promise<number> {
     const conversation = this.modelService.create("ChatConversation");
     const newConversation = await conversation.create({
@@ -1247,6 +1334,7 @@ export class SpellbookPrompt {
       mirostat_tau: mirostatTau,
       router_config: routerConfig,
       user_id: userId,
+      ally_id: allyId,
     });
     return newConversation.id;
   }
@@ -1255,6 +1343,8 @@ export class SpellbookPrompt {
   async handlePrompt(message: SocketMessage): Promise<boolean> {
     // make sure we have a language model running.
     const conversationData = message.payload;
+    console.log(conversationData);
+
     const preferredModel = this.spellbookService.getOnlineSkillFromKey(
       conversationData.use_model
     );
@@ -1322,7 +1412,8 @@ export class SpellbookPrompt {
           conversationData.mirostat_eta,
           conversationData.mirostat_tau,
           conversationData.router_config,
-          message.user_id
+          message.user_id,
+          conversationData.ally_id
         )
       : message.payload.conversation_id;
 
@@ -1357,6 +1448,11 @@ export class SpellbookPrompt {
       ["asset/spellbook/core/user-avatar.png"],
       message.user_id
     );
+    if (message.payload.parent_id)
+      await this.setMessageActiveChild(message.payload.parent_id, messageId);
+
+    if (!message.payload.parent_id)
+      await this.setConversationActiveChild(conversationId, messageId);
 
     // run checks on if this is a visual model or not
     const isVisualModel = availableVisualLanguageModels.includes(useModel)
@@ -1392,7 +1488,7 @@ export class SpellbookPrompt {
       num_complete: 0,
       router_config: routerConfig,
       user_permissions: userPermissions,
-      icons: ["asset/spellbook/core/ai-icon.jpeg"],
+      icons: [message.payload.ai_icon],
       user_shortcuts: userShortcuts,
       shortcuts: aiShortcuts,
       reasoning_agent: useReasoningAgent,
@@ -1412,6 +1508,8 @@ export class SpellbookPrompt {
       cursor_tail: "",
       guessed_function: null,
       user_id: message.user_id,
+      start_response: message.payload?.start_response || "",
+      generated_files: [],
     });
 
     // keep record of incoming socket message
@@ -1466,6 +1564,136 @@ export class SpellbookPrompt {
       return null;
     }
     return this.activeConversations.get(socketId);
+  }
+
+  @PluginSystem
+  setActivateConversation(
+    socketId: string,
+    conversation: ActivateConversation
+  ): void {
+    this.activeConversations.set(socketId, conversation);
+  }
+
+  @PluginSystem
+  async handleSwitchMessageChain(message: SocketMessage): Promise<void> {
+    const messageId = message.payload?.message_id || 0;
+    const activeId = message.payload?.active_child_id || 0;
+    const conversationId = message.payload?.conversation_id || 0;
+
+    if (messageId == 0)
+      await this.setConversationActiveChild(conversationId, activeId);
+    else await this.setMessageActiveChild(messageId, activeId);
+
+    this.socketService.emitToUser(message.user_id, "finish_command", {
+      command: "switch_message_chain",
+    });
+  }
+
+  @PluginSystem
+  async handleAsrDataUpload(message: SocketMessage): Promise<void> {
+    const userId = message.user_id;
+    const asrSkills = this.spellbookService.getOnlineSkillFromType(
+      "automatic_speech_recognition"
+    );
+    if (!asrSkills) {
+      this.logger.error(`no asr skills are loaded`);
+      this.socketService.emitToUser(userId, "finish_command", {
+        command: "process_asr_data",
+        text: "Error with ASR occurred 💣",
+      });
+      return;
+    }
+
+    const time = Date.now().toString();
+    const base64Data = message.payload.wav.replace(
+      `data:audio/${message.payload.file_type};base64,`,
+      ""
+    );
+    const fileName = `chats/asr/asr-${time}-${message.user_id}.${message.payload.file_type}`;
+    const filePath = await this.golemSoundService.saveSoundFile(
+      fileName,
+      base64Data,
+      userId
+    );
+
+    const shortPath = filePath.replace(`workspace/${message.user_id}`, "");
+    const url = await this.workspaceService.getUserFileUrl(
+      userId,
+      shortPath,
+      1
+    );
+
+    try {
+      const resp = await this.golemSoundService.automaticSpeechRecognition(
+        url,
+        userId,
+        asrSkills[0]
+      );
+
+      this.socketService.emitToUser(userId, "finish_command", {
+        command: "process_asr_data",
+        text: resp.text,
+      });
+      await this.workspaceService.deleteFileDirect(filePath);
+    } catch (ex) {}
+  }
+
+  async handleTtsDataUpload(message: SocketMessage): Promise<void> {
+    const userId = message.user_id;
+    const ttsSkills =
+      this.spellbookService.getOnlineSkillFromType("text_to_speech");
+
+    if (!ttsSkills) {
+      this.logger.error(`no text to speech skills are loaded`);
+      this.socketService.emitToUser(userId, "finish_command", {
+        command: "process_tts_data",
+        text: "Error with TTS occurred 💣",
+      });
+      return;
+    }
+
+    const words = message.payload.text.split(/\s+/);
+    const chunks = [];
+    for (let i = 0; i < words.length; i += 32) {
+      const chunk = words.slice(i, i + 32).join(" ");
+      chunks.push(chunk);
+    }
+
+    const voice =
+      message.payload?.voice != "default"
+        ? await this.workspaceService.getUserFileUrl(
+            userId,
+            message.payload.voice.replace(`workspace/${userId}/`, ""),
+            chunks.length
+          )
+        : "default";
+
+    for (let i = 0; i < chunks.length; i++) {
+      const data = await this.golemSoundService.textToSpeech(
+        chunks[i],
+        userId,
+        voice
+      );
+
+      const filename = `${userId}-${i}-asr-temp.wav`;
+      const filePath = await this.golemSoundService.saveSoundFile(
+        filename,
+        data.wav,
+        userId
+      );
+
+      const shortPath = filePath.replace(`workspace/${message.user_id}`, "");
+      const url = await this.workspaceService.getUserFileUrl(
+        userId,
+        shortPath,
+        1
+      );
+
+      this.socketService.emitToUser(userId, "finish_command", {
+        command: "process_tts_data",
+        wav_url: url,
+      });
+    }
   }
 }
 

@@ -6,19 +6,16 @@ import {
   ServicesConstructorInterface,
   VaultServiceInterface,
   WorkspaceServiceInterface,
+  WorkspaceDetails,
 } from "types";
 import { v4 as uuidv4 } from "uuid";
-
-interface WorkspaceDetails {
-  baseWorkspace: string;
-  currentWorkspace: string;
-}
 
 export class WorkspaceService implements WorkspaceServiceInterface {
   private services: ServicesConstructorInterface;
   private logger: LoggerServiceInterface;
   private vaultService: VaultServiceInterface;
   private workspaces: Map<string, WorkspaceDetails> = new Map();
+  private userToSocketMap: Map<number, string> = new Map();
   private tempAccessKeys: Map<string, number> = new Map();
   private readonly workingDir: string = "./workspace/";
 
@@ -29,6 +26,20 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     this.services = services;
     this.logger = services["LoggerService"];
     this.vaultService = services["VaultService"];
+  }
+
+  async copyFileDirect(source: string, destination: string): Promise<void> {
+    try {
+      console.log(source);
+      console.log(destination);
+      await fs.copyFile(source, destination);
+    } catch (ex) {
+      this.logger.error(
+        `could not copy file ${source} to ${destination}`,
+        {},
+        ex
+      );
+    }
   }
 
   async moveFilesToCurrentWorkspace(
@@ -70,6 +81,7 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     await fs.mkdir(baseWorkspace, { recursive: true });
     //await fs.mkdir(currentWorkspace, { recursive: true });
     this.workspaces.set(socketId, { baseWorkspace, currentWorkspace });
+    this.userToSocketMap.set(userId, socketId);
     this.logger.info(
       `setting workspaces for socket ${socketId} to ${baseWorkspace}`,
       { icon: "📂" }
@@ -87,6 +99,7 @@ export class WorkspaceService implements WorkspaceServiceInterface {
       "/";
 
     const workspaceDetails = this.workspaces.get(socketId);
+    this.userToSocketMap.set(userId, socketId);
     workspaceDetails.currentWorkspace = currentWorkspace;
     this.workspaces.set(socketId, workspaceDetails);
     if (createDirectory) {
@@ -128,8 +141,9 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     return `${prefix}${String(nextNumber).padStart(2, "0")}.${fileType}`;
   }
 
-  cleanupWorkspace(socketId: string): void {
+  cleanupWorkspace(socketId: string, userId: number): void {
     this.workspaces.delete(socketId);
+    this.userToSocketMap.delete(userId);
     this.logger.info(`cleaning up workspace for socket ${socketId}`, {
       icon: "🗑",
     });
@@ -204,10 +218,26 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     return savePath;
   }
 
+  async saveFileByUserId(
+    userId: number,
+    fileName: string,
+    content: string | Buffer,
+    currentWorkspace: boolean = true
+  ): Promise<string> {
+    const socketId = this.userToSocketMap.get(userId) || null;
+    if (!socketId) return null;
+    return await this.saveFile(socketId, fileName, content, currentWorkspace);
+  }
+
   // Delete a file from the working directory
   async deleteFile(socketId: string, fileName: string): Promise<void> {
     const workspaceDetails = this.workspaces.get(socketId) || null;
     await fs.unlink(path.join(workspaceDetails.currentWorkspace, fileName));
+  }
+
+  // Delete a file from the working directory
+  async deleteFileDirect(fileName: string): Promise<void> {
+    await fs.unlink(path.join("./", fileName));
   }
 
   private async checkIfExists(filePath: string): Promise<boolean> {
@@ -217,6 +247,27 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     } catch (err) {
       return false;
     }
+  }
+
+  async getUserFileUrl(
+    userId: number,
+    filePath: string,
+    accessCount: number = 0
+  ): Promise<string> {
+    if (!this.userToSocketMap.has(userId))
+      throw Error(`user id ${userId} had no open sockets`);
+    const socketId = this.userToSocketMap.get(userId);
+
+    const fullPath = await this.checkInWorkspaces(socketId, filePath);
+    if (!filePath) throw Error(`${fullPath} not found it workspace`);
+
+    const baseUrl = this.vaultService.getWorkspaceUrl();
+    if (accessCount) {
+      const accessKey = uuidv4();
+      this.tempAccessKeys.set(accessKey, accessCount);
+      return baseUrl + fullPath + `?key=` + encodeURIComponent(accessKey);
+    }
+    return baseUrl + fullPath;
   }
 
   async getFileUrl(
@@ -251,6 +302,12 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     await fs.mkdir(newFolder, { recursive: true });
   }
 
+  async createFolderByUserId(userId: number, folderPath: string) {
+    const socketId = this.userToSocketMap.get(userId) || null;
+    if (!socketId) return null;
+    return await this.createFolder(socketId, folderPath);
+  }
+
   async checkInWorkspaces(
     socketId: string,
     filePath: string
@@ -278,6 +335,11 @@ export class WorkspaceService implements WorkspaceServiceInterface {
     const workspaceDetails = this.workspaces.get(socketId) || null;
     if (!workspaceDetails) return this.workingDir;
     return workspaceDetails.currentWorkspace;
+  }
+
+  getWorkspaceDetails(socketId: string) {
+    const workspaceDetails = this.workspaces.get(socketId) || null;
+    return workspaceDetails;
   }
 
   deleteFolder(folderPath: string) {

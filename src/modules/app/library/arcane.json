@@ -1,0 +1,247 @@
+{
+  "name": "app/library",
+  "description": "Stores and reads e-pub books.",
+  "dependencies": [
+    "spellbook/golem",
+    "core/express",
+    "core/amqp",
+    "core/socket",
+    "core/persistent-map"
+  ],
+  "express_route": [
+    {
+      "route": "/upload/book",
+      "route_file": "route/library.upload",
+      "route_function": "uploadFile",
+      "request_type": "post"
+    }
+  ],
+  "queue": [
+    {
+      "name": "arcane_bridge_{serverid}",
+      "consumer": [
+        {
+          "class_name": "app.library",
+          "function": "handleAnalysisResponse",
+          "filter": "command:app_library_analysis"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleAnalysisImageResponse",
+          "filter": "command:app_library_generate_analysis_image"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleImagePromptUpdate",
+          "filter": "command:app_library_image_style"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleMergeCharacterRaw",
+          "filter": "command:app_library_fiction_character_merge"
+        }
+      ]
+    }
+  ],
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "app.library",
+          "function": "handleGenerateQuiz",
+          "filter": "command:app_library_generate_quiz"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleConvertToAlly",
+          "filter": "command:app_library_convert_to_ally"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleStopBookAnalysis",
+          "filter": "command:app_library_stop_job"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleAnalyzeBook",
+          "filter": "command:app_library_analyze_book"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleIngestBook",
+          "filter": "command:app_library_ingest_book"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleMergeRefinedCharacters",
+          "filter": "command:app_library_merge_refined_characters"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleGenerateArt",
+          "filter": "command:app_library_generate_art"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleRegenerateArt",
+          "filter": "command:app_library_regenerate_art"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleGenerateWorldMap",
+          "filter": "command:app_library_generate_world_map"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleRefineCharacters",
+          "filter": "command:app_library_refine_characters"
+        },
+        {
+          "class_name": "app.library",
+          "function": "handleGetJobStatus",
+          "filter": "command:app_library_get_job_status"
+        }
+      ]
+    }
+  ],
+  "sequelize_model": [
+    {
+      "name": "LibraryBookContent",
+      "class_file": "model/book.content.model",
+      "factory_file": "model/book.content.model.factory",
+      "graphql_query": [
+        {
+          "query": "getLibraryBookContent",
+          "args": [
+            {
+              "name": "book_id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LibraryBookContentQuery",
+          "response_type": "list"
+        }
+      ]
+    },
+    {
+      "name": "LibraryBookAnalysis",
+      "class_file": "model/book.analysis.model",
+      "factory_file": "model/book.analysis.model.factory",
+      "graphql_query": [
+        {
+          "query": "getLibraryBookAnalysis",
+          "args": [
+            {
+              "name": "book_id",
+              "type": "integer"
+            },
+            {
+              "name": "process",
+              "type": "string"
+            }
+          ],
+          "schema_type": "LibraryBookAnalysisQuery",
+          "response_type": "list"
+        },
+        {
+          "query": "getLibraryBookAnalysisByProcess",
+          "args": [
+            {
+              "name": "process",
+              "type": "string"
+            }
+          ],
+          "schema_type": "LibraryBookAnalysisByProcess",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteLibraryBookAnalysis",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LibraryBookAnalysisDelete",
+          "resolver_file": "app.library",
+          "resolver_function": "deleteLibraryBookAnalysis"
+        },
+        {
+          "mutation": "updateLibraryBookAnalysis",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "result",
+              "type": "string"
+            }
+          ],
+          "schema_type": "LibraryBookAnalysisUpdate",
+          "resolver_file": "app.library",
+          "resolver_function": "updateLibraryBookAnalysis"
+        }
+      ]
+    },
+    {
+      "name": "LibraryBook",
+      "class_file": "model/book.model",
+      "factory_file": "model/book.model.factory",
+      "graphql_query": [
+        {
+          "query": "getLibraryBook",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LibraryBookQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteLibraryBook",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LibraryBookDelete",
+          "resolver_file": "app.library",
+          "resolver_function": "deleteLibraryBook"
+        },
+        {
+          "mutation": "updateLibraryBook",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "num_pages",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "LibraryBookUpdate",
+          "resolver_file": "app.library",
+          "resolver_function": "updateLibraryBook"
+        }
+      ]
+    }
+  ]
+}

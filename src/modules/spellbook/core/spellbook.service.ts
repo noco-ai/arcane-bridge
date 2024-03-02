@@ -16,6 +16,8 @@ import {
   SpellbookServiceInterface,
   SocketMessage,
   EmptyCliOptions,
+  PromptProcessor,
+  PromptProcessors,
 } from "types";
 import { PluginSystem } from "../../../plugin";
 import Ajv from "ajv";
@@ -44,6 +46,7 @@ export class SpellbookService implements SpellbookServiceInterface {
   private functionShortcutMap: Map<string, string>;
   private activeSkillCommands: Map<string, string>;
   private validateSkill: any = null;
+  private promptProcessors: PromptProcessors;
 
   constructor(
     cliOptions: EmptyCliOptions,
@@ -146,7 +149,21 @@ export class SpellbookService implements SpellbookServiceInterface {
   }
 
   @PluginSystem
-  getPrompt(module: string, promptKey: string): string | null | ChatMessage[] {
+  setPromptProcessors(processors: PromptProcessors): void {
+    if (this.promptProcessors) {
+      this.logger.error(`prompt processors already set for spellbook service`);
+      return;
+    }
+    this.promptProcessors = processors;
+  }
+
+  @PluginSystem
+  getPromptProcessors(): PromptProcessors {
+    return this.promptProcessors;
+  }
+
+  @PluginSystem
+  getPrompt(module: string, promptKey: string): string | null | any {
     if (!this.prompts.has(module)) return null;
     const modulePrompts = this.prompts.get(module);
     if (!modulePrompts.has(promptKey)) return null;
@@ -187,6 +204,45 @@ export class SpellbookService implements SpellbookServiceInterface {
       }
     }
     return currentHasRedStyle;
+  }
+
+  @PluginSystem
+  async getReasoningAgent(modelType: string = "best"): Promise<string> {
+    let fastestLocal = null;
+    let bestLocal = null;
+    let fastestRemote = null;
+    let bestRemote = null;
+    let largestModel = 0;
+    let smallestModel = 100000000000000000000;
+    const online = this.getOnlineSkills();
+    if (!online.length) return null;
+
+    for (let i = 0; i < online.length; i++) {
+      if (online[i].use.includes("reasoning_agent")) {
+        if (online[i].routing_key.indexOf("openai") !== -1) {
+          if (online[i].routing_key.indexOf("4") !== -1)
+            bestRemote = online[i].routing_key;
+          else fastestRemote = online[i].routing_key;
+        } else {
+          if (
+            online[i].ram > largestModel ||
+            (online[i].ram >= largestModel && online[i].device != "cpu")
+          ) {
+            largestModel = online[i].ram;
+            bestLocal = online[i].routing_key;
+          }
+          if (
+            online[i].ram < smallestModel ||
+            (online[i].ram <= smallestModel && online[i].device != "cpu")
+          ) {
+            smallestModel = online[i].ram;
+            fastestLocal = online[i].routing_key;
+          }
+        }
+      }
+    }
+    if (modelType == "best") return bestLocal || bestRemote;
+    else return fastestLocal || fastestRemote;
   }
 
   @PluginSystem
@@ -901,6 +957,48 @@ export class SpellbookService implements SpellbookServiceInterface {
       }
     }
     return true;
+  }
+
+  @PluginSystem
+  async getPayloadFromChatKey(
+    uniqueKey: string,
+    bookChunk: string,
+    startResponse: string
+  ) {
+    const promptRecord = this.modelService.create("LlmExplorerChat");
+    const loadedChat = await promptRecord.findOne({
+      where: { unique_key: uniqueKey },
+    });
+    if (!loadedChat) return null;
+
+    const examplePairs = JSON.parse(loadedChat.examples);
+    const messagePairs = [];
+    for (let i = 0; i < examplePairs.length; i++) {
+      if (examplePairs[i].exclude === "true") continue;
+      messagePairs.push({ role: "user", content: examplePairs[i].user });
+      messagePairs.push({
+        role: "assistant",
+        content: examplePairs[i].assistant,
+      });
+    }
+
+    const messages = [
+      { role: "system", content: loadedChat.system_message },
+      ...messagePairs,
+      { role: "user", content: bookChunk.toString() },
+    ];
+
+    const payload = {
+      messages: messages,
+      top_k: loadedChat.top_k,
+      top_p: loadedChat.top_p,
+      min_p: loadedChat.min_p,
+      temperature: loadedChat.temperature,
+      start_response: startResponse,
+      stream: false,
+      debug: true,
+    };
+    return payload;
   }
 
   @PluginSystem

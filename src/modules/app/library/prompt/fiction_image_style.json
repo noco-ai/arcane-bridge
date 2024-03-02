@@ -1,0 +1,43 @@
+{
+    "temperature": 1,
+    "top_k": 50,
+    "top_p": 0.9,
+    "min_p": 0.05,
+    "seed": -1,
+    "mirostat": 0,
+    "mirostat_eta": 0.1,
+    "mirostat_tau": 5,
+    "start_response": "{",
+    "stream": false,
+    "debug": true,
+    "messages": [
+      {
+        "role": "system",
+        "content": "The user message contains a prompt used to generate an image using a diffusion model. Modify the original prompt to include the artist and desired style mentioned on separate lines stating with Art Style: and Artist:. Your response should be a JSON object with one key, modified_prompt and should contain the modified image prompt."
+      },
+      {
+        "role": "user",
+        "content": "Original Prompt: Illustration depicting a long hallway with doors on either side and lamps hanging from the ceiling. A low curtain reveals a tiny door leading to a beautiful garden filled with flowers and fountains. A table with a bottle labeled 'DRINK ME' sits in the hallway, inviting the viewer into the adventure.\nArt Style: Watercolor\nArtist: Leonardo da Vinci"
+      },
+      {
+        "role": "assistant",
+        "content": "{\n    \"modified_prompt\": \"Watercolor painting of a lengthy hallway, adorned with doors on both sides and lamps suspended from the ceiling. A low hanging curtain partially uncovers a minuscule door that leads into a breathtaking garden, brimming with an array of flowers and elegant fountains. Within the hallway, a table is situated, hosting a bottle labeled 'DRINK ME', alluring the viewer into the unfolding adventure. Painted in the style of Leonardo da Vinci\"\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "A vibrant, sunlit countryside with patches of green and yellow interspersed with darker areas that indicate a mix of pleasant and terrifying landscapes. The trees are tall and dense, forming an archway through which the Munchkins walk away, leaving Dorothy behind on her journey. In the distance lies a large desert, with the path to Oz marked by yellow bricks, shining under the sunlight.\nArt Style: Oil Painting\nArtist: Salvador Dalí"
+      },
+      {
+        "role": "assistant",
+        "content": "{\n    \"modified_prompt\": \"An oil painting featuring a bright, sun-drenched countryside, highlighted with patches of green and yellow, interrupted by darker regions that suggest a combination of pleasant and intimidating landscapes. The trees stand tall and thick, crafting an archway through which the Munchkins stroll away, abandoning Dorothy on her quest. A vast desert lies in the backdrop, with the route to Oz demarcated by gleaming yellow bricks under the sun's rays. This is envisioned in the style of Salvador Dalí\"\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "A large rocky heath surrounded by trees, with a small stream cutting through it. The sun is setting, casting an orange glow over the landscape. A bear can be seen in the distance near the dwarf's cave.\nArt Style: Charcoal Drawing"
+      },
+      {
+        "role": "assistant",
+        "content": "{\n    \"modified_prompt\": \"A charcoal drawing depicting a vast rocky heath circumscribed by trees, with a tiny stream winding through it. The sun sets, casting an orange hue over the surroundings. In the distance is a bear near the entrance of the dwarf's cave.\"\n}\n\n"
+      }
+    ]
+  }

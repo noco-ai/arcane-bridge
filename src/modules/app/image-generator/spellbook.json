@@ -14,7 +14,7 @@
       "label": "Image Generator",
       "spell_label": "Picturae Genesis",
       "group": "spells",
-      "sort_order": 100,
+      "sort_order": 300,
       "icon": "pi pi-fw pi-image",
       "route": "image-generator",
       "key": "app_image_generator",

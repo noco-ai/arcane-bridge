@@ -8,13 +8,13 @@
   "icon": "asset/app/llm-explorer/llm-explorer.jpeg",
   "unique_key": "app_llm_explorer",
   "can_remove": true,
-  "skill_dependencies": ["language_model"],
+  "skill_dependencies": ["language_model|reasoning_agent"],
   "menu_item": [
     {
       "label": "LLM Explorer",
       "spell_label": "Lexicon Enigma",
       "group": "spells",
-      "sort_order": 100,
+      "sort_order": 200,
       "icon": "pi pi-fw pi-compass",
       "route": "llm-explorer",
       "key": "app_llm_explorer",

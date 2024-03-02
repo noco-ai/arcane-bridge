@@ -61,18 +61,8 @@ class ImageGeneratorSkill
       icon: "🎶",
     });
 
-    const baseUrl = this.vaultService.getBaseUrl();
-    const html = `<div class="card p-0 audio-card" style="background-image: url('${baseUrl}asset/chat-ability/music-generator/music-background.jpg');">
-        <div class="align-content-center pt-1 pb-2">
-          <audio controls style="margin: auto; display: block">
-              <source src="${baseUrl}${filePath}" type="audio/wav">
-              Your browser does not support the audio element.
-          </audio>                    
-        </div>                
-      </div>
-      <p style="width: 100%; text-align: center; font-weight: 600" class="text-l">${fileName}</p>`;
-
-    await this.responseClass.sendResponse(html, null, socketId);
+    const html = `<div style="display: none"></div>`;
+    await this.responseClass.sendResponse(html, null, socketId, [filePath]);
     const job = this.runningJobs.get(socketId);
     job.resolve(true);
     this.runningJobs.delete(socketId);
@@ -138,6 +128,8 @@ class ImageGeneratorSkill
         payload,
         {
           socket_id: socketMessage.socket_id,
+          user_id: socketMessage.user_id,
+          progress_target: "chat_progress",
         }
       );
     });

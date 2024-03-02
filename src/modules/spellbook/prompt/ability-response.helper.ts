@@ -1,5 +1,6 @@
 import {
   AbilityResponseHelperInterface,
+  ActivateConversation,
   ChatMessage,
   LoggerServiceInterface,
   ProgressBarUpdate,
@@ -106,13 +107,21 @@ export class AbilityResponseHelper implements AbilityResponseHelperInterface {
   async sendResponse(
     response: string,
     textOnlyResponse: string | null,
-    socketId: string
+    socketId: string,
+    files?: string[]
   ): Promise<boolean> {
     if (!response || !socketId) {
       this.logger.error(
         `could not send chat ability response, invalid socket id`
       );
       return false;
+    }
+
+    if (files) {
+      const conversation: ActivateConversation =
+        this.promptClass.getActivateConversation(socketId);
+      conversation.generated_files = files;
+      this.promptClass.setActivateConversation(socketId, conversation);
     }
 
     return await this.promptClass.handlePromptFragment({

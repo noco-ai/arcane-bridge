@@ -41,7 +41,6 @@
       ]
     }
   ],
-
   "socket_event": [
     {
       "event": "command",

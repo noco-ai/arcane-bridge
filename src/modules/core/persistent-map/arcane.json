@@ -1,0 +1,13 @@
+{
+  "name": "core/persistent-map",
+  "description": "Provides storage of map objects in Redis to avoid issues if TypeScript app crashes.",
+  "dependencies": ["core/logger", "core/class-factory", "core/socket"],
+  "service": [
+    {
+      "class_name": "PersistentMapService",
+      "class_file": "persistent-map.service",
+      "description": "Provides storage of map objects in Redis to avoid issues if TypeScript app crashes.",
+      "log_config": ["core/logger/general"]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "name": "app/sound-studio",
+  "description": "Stores and reads e-pub books.",
+  "dependencies": ["spellbook/core", "core/socket"],
+  "socket_event": [
+    {
+      "event": "command",
+      "consumer": [
+        {
+          "class_name": "app.sound.studio",
+          "function": "handleGenerateSound",
+          "filter": "command:app_sound_studio_generate"
+        },
+        {
+          "class_name": "app.sound.studio",
+          "function": "handleAsrWav",
+          "filter": "command:app_sound_studio_asr_wav"
+        },
+        {
+          "class_name": "app.sound.studio",
+          "function": "handleAsrFileUpload",
+          "filter": "command:app_sound_studio_process_asr_upload"
+        }
+      ]
+    }
+  ],
+  "sequelize_model": [
+    {
+      "name": "SoundFile",
+      "class_file": "model/sound.file.model",
+      "factory_file": "model/sound.file.model.factory",
+      "graphql_query": [
+        {
+          "query": "getSoundFiles",
+          "args": [
+            {
+              "name": "type",
+              "type": "string"
+            }
+          ],
+          "schema_type": "SoundFilesQuery",
+          "response_type": "list"
+        }
+      ],
+      "graphql_mutation": [
+        {
+          "mutation": "deleteSoundFile",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ],
+          "schema_type": "SoundFileDelete",
+          "resolver_file": "app.sound.studio",
+          "resolver_function": "deleteSoundFile"
+        },
+        {
+          "mutation": "updateSoundFileLabel",
+          "args": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "label",
+              "type": "string"
+            }
+          ],
+          "schema_type": "SoundFileUpdateLabel",
+          "resolver_file": "app.sound.studio",
+          "resolver_function": "updateSoundFileLabel"
+        }
+      ]
+    }
+  ]
+}
